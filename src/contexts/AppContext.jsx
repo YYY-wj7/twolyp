@@ -68,10 +68,16 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let active = true
 
+    // Safety timeout: if session restore takes too long, show login page
+    const timeout = setTimeout(() => {
+      if (active) setIsLoading(false)
+    }, 5000)
+
     async function restoreSession() {
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (!active) return
+        clearTimeout(timeout)
 
         if (session?.user) {
           // Fetch profile
