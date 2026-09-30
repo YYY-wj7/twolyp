@@ -206,7 +206,7 @@ export default function LoginPage() {
               <p className="mt-1.5 text-sm leading-6 text-milk-600 dark:text-milk-400">
                 {mode === 'login' && '登录后继续翻阅只属于你们的回忆。'}
                 {mode === 'register' && registerType === 'create' && '第一位用户先创建花园，之后再生成邀请码邀请另一位。'}
-                {mode === 'register' && registerType === 'join' && '使用 TA 分享的一次性邀请码注册，进入同一个私密空间。'}
+                {mode === 'register' && registerType === 'join' && '和 TA 一起创建你们的花园。'}
                 {mode === 'verify' && <>验证码已发送至 <span className="font-medium text-milk-800 dark:text-milk-200">{email}</span></>}
                 {mode === 'forgot' && '输入注册邮箱，我们会发送一次性验证码。'}
                 {mode === 'reset' && <>请使用发送至 <span className="font-medium text-milk-800 dark:text-milk-200">{email}</span> 的验证码设置新密码。</>}

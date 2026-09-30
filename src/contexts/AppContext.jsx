@@ -23,10 +23,43 @@ const DBContext = createContext(null)
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
 
 /**
- * AuthProvider — Supabase Auth backed authentication.
+ * Load garden info for the current user.
+ * Queries garden_members to find which garden the user belongs to.
+ */
+async function loadGardenInfo(userId) {
+  try {
+    const { data: membership } = await supabase
+      .from('garden_members')
+      .select('garden_id')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (membership?.garden_id) {
+      const { data: garden } = await supabase
+        .from('gardens')
+        .select('id, name, created_by, invite_code')
+        .eq('id', membership.garden_id)
+        .single()
+
+      return {
+        gardenId: garden?.id || membership.garden_id,
+        garden: garden || null,
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load garden info:', e)
+  }
+  return { gardenId: null, garden: null }
+}
+
+/**
+ * AuthProvider — Supabase Auth backed authentication + garden state.
  */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
+  const [gardenId, setGardenId] = useState(null)
+  const [inviteCode, setInviteCode] = useState(null)
+  const [garden, setGarden] = useState(null)
   const [pendingRegistration, setPendingRegistration] = useState(null)
   const [pendingPasswordReset, setPendingPasswordReset] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -54,6 +87,17 @@ export function AuthProvider({ children }) {
             nickname: profile?.nickname || '',
             avatar: profile?.avatar_url || null,
           }
+
+          // Load garden info
+          const { gardenId: gid, garden: g } = await loadGardenInfo(session.user.id)
+          if (!active) return
+          setGardenId(gid)
+          setGarden(g)
+
+          // Load invite code from local storage
+          const codeEntry = await db.appSettings.get('garden-invite-code')
+          if (codeEntry?.value) setInviteCode(codeEntry.value)
+
           setUser(nextUser)
 
           // Persist last active time locally
@@ -99,6 +143,16 @@ export function AuthProvider({ children }) {
           nickname: profile?.nickname || '',
           avatar: profile?.avatar_url || null,
         }
+
+        // Load garden info on sign in
+        const { gardenId: gid, garden: g } = await loadGardenInfo(session.user.id)
+        if (!active) return
+        setGardenId(gid)
+        setGarden(g)
+
+        const codeEntry = await db.appSettings.get('garden-invite-code')
+        if (codeEntry?.value) setInviteCode(codeEntry.value)
+
         setUser(nextUser)
         await db.appSettings.put({
           key: 'auth-session',
@@ -106,6 +160,9 @@ export function AuthProvider({ children }) {
         })
       } else if (event === 'SIGNED_OUT') {
         setUser(null)
+        setGardenId(null)
+        setInviteCode(null)
+        setGarden(null)
         await db.appSettings.delete('auth-session')
       }
     })
@@ -134,16 +191,16 @@ export function AuthProvider({ children }) {
     return data.user
   }, [])
 
-  const register = useCallback(async ({ email, password, inviteCode, createGarden }) => {
+  const register = useCallback(async ({ email, password, inviteCode: code, createGarden }) => {
     if (!email || !password) throw new Error('请完整填写注册信息')
-    if (!createGarden && !inviteCode) throw new Error('加入花园需要邀请码')
+    if (!createGarden && !code) throw new Error('加入花园需要邀请码')
 
     // If joining with invite code, verify it first
-    if (!createGarden && inviteCode) {
+    if (!createGarden && code) {
       const { data: inviteData, error: inviteError } = await supabase
         .from('invite_codes')
         .select('garden_id, is_used')
-        .eq('code', inviteCode.trim().toUpperCase())
+        .eq('code', code.trim().toUpperCase())
         .single()
 
       if (inviteError || !inviteData) {
@@ -170,7 +227,7 @@ export function AuthProvider({ children }) {
       password,
       options: {
         data: {
-          invite_code: !createGarden ? inviteCode.trim().toUpperCase() : null,
+          invite_code: !createGarden ? code.trim().toUpperCase() : null,
           create_garden: createGarden,
         },
       },
@@ -183,7 +240,7 @@ export function AuthProvider({ children }) {
       throw new Error(error.message || '注册失败')
     }
 
-    setPendingRegistration({ email, inviteCode, createGarden, userId: data.user?.id })
+    setPendingRegistration({ email, inviteCode: code, createGarden, userId: data.user?.id })
     return { emailVerificationRequired: true }
   }, [])
 
@@ -209,29 +266,29 @@ export function AuthProvider({ children }) {
 
       if (pendingRegistration.createGarden) {
         // Create a new garden for the first user
-        const inviteCode = generateInviteCode()
-        const { data: garden, error: gardenError } = await supabase
+        const newInviteCode = generateInviteCode()
+        const { data: gardenData, error: gardenError } = await supabase
           .from('gardens')
           .insert({
             name: '我们的花园',
             created_by: userId,
-            invite_code: inviteCode,
+            invite_code: newInviteCode,
           })
           .select()
           .single()
 
-        if (gardenError) throw new Error('创建花园失败')
+        if (gardenError) throw new Error('创建花园失败: ' + (gardenError.message || ''))
 
         // Add creator as owner
         await supabase
           .from('garden_members')
-          .insert({ garden_id: garden.id, user_id: userId, role: 'owner' })
+          .insert({ garden_id: gardenData.id, user_id: userId, role: 'owner' })
 
-        // Store invite code locally for display
-        await db.appSettings.put({
-          key: 'garden-invite-code',
-          value: inviteCode,
-        })
+        // Store invite code and garden info locally
+        await db.appSettings.put({ key: 'garden-invite-code', value: newInviteCode })
+        setInviteCode(newInviteCode)
+        setGardenId(gardenData.id)
+        setGarden(gardenData)
       } else if (pendingRegistration.inviteCode) {
         // Join existing garden
         const { data: inviteData } = await supabase
@@ -250,6 +307,16 @@ export function AuthProvider({ children }) {
             .from('invite_codes')
             .update({ is_used: true, used_by: userId, used_at: new Date().toISOString() })
             .eq('code', pendingRegistration.inviteCode.trim().toUpperCase())
+
+          // Load garden info
+          const { data: gardenData } = await supabase
+            .from('gardens')
+            .select('id, name, created_by, invite_code')
+            .eq('id', inviteData.garden_id)
+            .single()
+
+          setGardenId(inviteData.garden_id)
+          setGarden(gardenData)
         }
       }
 
@@ -308,6 +375,9 @@ export function AuthProvider({ children }) {
   const logout = useCallback(async () => {
     await supabase.auth.signOut()
     setUser(null)
+    setGardenId(null)
+    setInviteCode(null)
+    setGarden(null)
     setPendingRegistration(null)
     setPendingPasswordReset(null)
     await db.appSettings.delete('auth-session')
@@ -316,6 +386,9 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{
       user,
+      gardenId,
+      inviteCode,
+      garden,
       isLoading,
       login,
       register,

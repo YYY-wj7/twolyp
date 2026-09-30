@@ -1,12 +1,14 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, User, Lock, Bell, Shield, Palette, Globe, ChevronRight } from 'lucide-react'
+import { ArrowLeft, User, Lock, Bell, Shield, Palette, Globe, ChevronRight, Check, Pencil } from 'lucide-react'
+import { useAuth } from '../contexts/AppContext'
+import { supabase } from '../lib/supabase'
 import { cn } from '../lib/utils'
 
 const SETTING_SECTIONS = [
   {
     title: '账号',
     items: [
-      { icon: User, label: '个人资料', desc: '昵称、头像' },
       { icon: Lock, label: '安全设置', desc: '密码、两步验证' },
     ],
   },
@@ -28,6 +30,33 @@ const SETTING_SECTIONS = [
 
 export default function SettingsPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const [editingNickname, setEditingNickname] = useState(false)
+  const [nickname, setNickname] = useState(user?.nickname || '')
+  const [saving, setSaving] = useState(false)
+
+  const handleSaveNickname = async () => {
+    const trimmed = nickname.trim()
+    if (!trimmed || trimmed === user?.nickname) {
+      setEditingNickname(false)
+      return
+    }
+
+    setSaving(true)
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ nickname: trimmed })
+        .eq('id', user.id)
+
+      if (error) throw error
+      setEditingNickname(false)
+    } catch (err) {
+      console.error('Failed to save nickname:', err)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="relative z-10">
@@ -46,6 +75,68 @@ export default function SettingsPage() {
       </header>
 
       <div className="px-4 mt-2 space-y-6 pb-8">
+        {/* Profile card with nickname editing */}
+        <div>
+          <h2 className="text-xs font-medium text-milk-500 dark:text-milk-400 uppercase tracking-wider mb-2 px-1">
+            个人资料
+          </h2>
+          <div className="rounded-2xl bg-white dark:bg-dark-card border border-milk-100 dark:border-dark-border overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3.5">
+              <User className="w-5 h-5 text-apricot-500" />
+              <div className="flex-1 text-left">
+                <span className="text-sm text-milk-900 dark:text-milk-100">
+                  昵称
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {editingNickname ? (
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="text"
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                      maxLength={20}
+                      autoFocus
+                      className={cn(
+                        'w-28 h-7 px-2 rounded-lg text-sm text-right',
+                        'bg-milk-50 dark:bg-dark-surface',
+                        'border border-milk-200 dark:border-dark-border',
+                        'text-milk-900 dark:text-milk-100',
+                        'focus:outline-none focus:ring-1 focus:ring-apricot-300'
+                      )}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveNickname()
+                        if (e.key === 'Escape') {
+                          setNickname(user?.nickname || '')
+                          setEditingNickname(false)
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={handleSaveNickname}
+                      disabled={saving}
+                      className="w-7 h-7 flex items-center justify-center rounded-lg bg-apricot-100 dark:bg-apricot-400/10 text-apricot-500 active:scale-95 transition-transform"
+                    >
+                      <Check className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setEditingNickname(true)}
+                    className="flex items-center gap-1.5"
+                  >
+                    <span className="text-sm text-milk-600 dark:text-milk-300">
+                      {user?.nickname || '未设置'}
+                    </span>
+                    <Pencil className="w-3.5 h-3.5 text-milk-400" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Other settings sections */}
         {SETTING_SECTIONS.map(section => (
           <div key={section.title}>
             <h2 className="text-xs font-medium text-milk-500 dark:text-milk-400 uppercase tracking-wider mb-2 px-1">

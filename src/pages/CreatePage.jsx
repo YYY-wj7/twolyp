@@ -1,20 +1,26 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Image, Film, MapPin, Tag, Calendar, ChevronDown, Check } from 'lucide-react'
+import { X, Image, Film, MapPin, Tag, Calendar, ChevronDown, Check, Loader2 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { CATEGORIES } from '../lib/constants'
+import { useAuth } from '../contexts/AppContext'
+import { supabase } from '../lib/supabase'
+import { compressImage, uploadImages } from '../lib/storage'
 
 export default function CreatePage() {
   const navigate = useNavigate()
+  const { user, gardenId } = useAuth()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [category, setCategory] = useState('')
   const [tags, setTags] = useState([])
   const [tagInput, setTagInput] = useState('')
   const [media, setMedia] = useState([])
-  const [location, setLocation] = useState(null)
+  const [locationName, setLocationName] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
+  const [isPublishing, setIsPublishing] = useState(false)
+  const [error, setError] = useState('')
   const fileInputRef = useRef(null)
   const videoInputRef = useRef(null)
 
@@ -32,23 +38,72 @@ export default function CreatePage() {
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files || [])
     const newMedia = files.map(file => ({
-      id: crypto.randomUUID?.() || Date.now().toString(36),
+      id: crypto.randomUUID?.() || Date.now().toString(36) + Math.random().toString(36).slice(2),
       file,
       preview: URL.createObjectURL(file),
       type: file.type.startsWith('video/') ? 'video' : 'image',
-      caption: '',
     }))
-    setMedia([...media, ...newMedia])
+    setMedia(prev => [...prev, ...newMedia])
+    // Reset input so same file can be selected again
+    e.target.value = ''
   }
 
   const handleRemoveMedia = (id) => {
+    const item = media.find(m => m.id === id)
+    if (item?.preview) URL.revokeObjectURL(item.preview)
     setMedia(media.filter(m => m.id !== id))
   }
 
-  const handlePublish = () => {
-    // TODO: Implement publish logic with encryption + upload
-    console.log('Publishing:', { title, content, category, tags, media, location, date })
-    navigate('/feed')
+  const handlePublish = async () => {
+    if (!title && media.length === 0) return
+    if (!gardenId) {
+      setError('花园尚未就绪，请稍后再试')
+      return
+    }
+
+    setIsPublishing(true)
+    setError('')
+
+    try {
+      // 1. Create the record
+      const { data: record, error: recordError } = await supabase
+        .from('records')
+        .insert({
+          garden_id: gardenId,
+          author_id: user.id,
+          title: title || '',
+          content: content || '',
+          category: category || 'daily',
+          custom_tags: tags,
+          location_name: locationName || '',
+          recorded_at: date,
+        })
+        .select()
+        .single()
+
+      if (recordError) throw new Error('保存记录失败: ' + recordError.message)
+
+      // 2. Upload images if any
+      const imageFiles = media.filter(m => m.type === 'image').map(m => m.file)
+      if (imageFiles.length > 0) {
+        const mediaEntries = await uploadImages(imageFiles, gardenId, record.id)
+
+        // 3. Save media entries to database
+        if (mediaEntries.length > 0) {
+          const { error: mediaError } = await supabase
+            .from('media')
+            .insert(mediaEntries)
+          if (mediaError) console.warn('Media insert warning:', mediaError.message)
+        }
+      }
+
+      // 4. Navigate back to feed
+      navigate('/feed')
+    } catch (err) {
+      setError(err.message || '发布失败，请重试')
+    } finally {
+      setIsPublishing(false)
+    }
   }
 
   return (
@@ -67,18 +122,28 @@ export default function CreatePage() {
           </h1>
           <button
             onClick={handlePublish}
-            disabled={!title && media.length === 0}
+            disabled={isPublishing || (!title && media.length === 0)}
             className={cn(
-              'px-5 py-1.5 rounded-full text-sm font-medium transition-all',
-              title || media.length > 0
-                ? 'bg-apricot-400 text-white active:scale-95'
-                : 'bg-milk-200 dark:bg-dark-border text-milk-400 cursor-not-allowed'
+              'px-5 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5',
+              isPublishing
+                ? 'bg-milk-200 dark:bg-dark-border text-milk-400 cursor-not-allowed'
+                : title || media.length > 0
+                  ? 'bg-apricot-400 text-white active:scale-95'
+                  : 'bg-milk-200 dark:bg-dark-border text-milk-400 cursor-not-allowed'
             )}
           >
-            发布
+            {isPublishing && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isPublishing ? '发布中' : '发布'}
           </button>
         </div>
       </header>
+
+      {/* Error message */}
+      {error && (
+        <div className="mx-4 mt-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-sm text-red-600 dark:text-red-400">
+          {error}
+        </div>
+      )}
 
       {/* Content area */}
       <div className="flex-1 px-4 py-3 space-y-4 overflow-y-auto">
@@ -103,7 +168,7 @@ export default function CreatePage() {
                 )}
                 <button
                   onClick={() => handleRemoveMedia(item.id)}
-                  className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center"
                 >
                   <X className="w-3.5 h-3.5 text-white" />
                 </button>
@@ -190,20 +255,24 @@ export default function CreatePage() {
               placeholder="+ 添加标签"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
               className="flex-1 min-w-[100px] text-sm bg-transparent text-milk-800 dark:text-milk-200 placeholder:text-milk-400 focus:outline-none"
             />
           </div>
 
           {/* Location */}
-          <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-milk-100 dark:bg-dark-card hover:bg-milk-200 dark:hover:bg-dark-border transition-colors w-full">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-milk-100 dark:bg-dark-card">
             <MapPin className="w-4 h-4 text-apricot-500" />
-            <span className="text-sm text-milk-400">
-              {location || '添加地点'}
-            </span>
-          </button>
+            <input
+              type="text"
+              placeholder="添加地点"
+              value={locationName}
+              onChange={(e) => setLocationName(e.target.value)}
+              className="flex-1 text-sm bg-transparent text-milk-800 dark:text-milk-200 placeholder:text-milk-400 focus:outline-none"
+            />
+          </div>
 
-          {/* Date (for backdating) */}
+          {/* Date */}
           <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-milk-100 dark:bg-dark-card hover:bg-milk-200 dark:hover:bg-dark-border transition-colors w-full">
             <Calendar className="w-4 h-4 text-apricot-500" />
             <input
@@ -249,13 +318,6 @@ export default function CreatePage() {
           >
             <Film className="w-5 h-5" />
             视频
-          </button>
-          <button
-            onClick={() => {/* TODO: open location picker */}}
-            className="flex items-center gap-1.5 text-sm text-milk-600 dark:text-milk-400 hover:text-apricot-500 transition-colors"
-          >
-            <MapPin className="w-5 h-5" />
-            地点
           </button>
         </div>
       </div>
