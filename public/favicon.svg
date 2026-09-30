@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="TwoLyp tulip">
+  <defs>
+    <linearGradient id="petal" x1="20" y1="18" x2="74" y2="65" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD0D8"/>
+      <stop offset="0.55" stop-color="#F58EA5"/>
+      <stop offset="1" stop-color="#E85D7A"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="34" y1="52" x2="65" y2="85" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8EAE72"/>
+      <stop offset="1" stop-color="#56734D"/>
+    </linearGradient>
+  </defs>
+  <path d="M48 19c-5.8 0-11 5.7-13.2 13.7C28.9 26.4 22 25.1 17 28.8c.6 22.8 10.8 36.4 31 40.7 20.2-4.3 30.4-17.9 31-40.7-5-3.7-11.9-2.4-17.8 3.9C59 24.7 53.8 19 48 19Z" fill="url(#petal)"/>
+  <path d="M34.8 32.7C35.4 47.4 39.8 59.8 48 69.5c8.2-9.7 12.6-22.1 13.2-36.8C55.7 37.1 51.3 42.4 48 49c-3.3-6.6-7.7-11.9-13.2-16.3Z" fill="#FFB5C4" opacity=".86"/>
+  <path d="M46.2 68.4v12.8c0 3.4-2.4 5.8-6.6 7.1M49.8 68.4v12.8c0 3.4 2.4 5.8 6.6 7.1" fill="none" stroke="#6F8D5C" stroke-width="3.8" stroke-linecap="round"/>
+  <path d="M45.8 75.2c-8-5.9-15.1-4.7-20.4 3.4 9.1 2.1 15.9 1 20.4-3.4ZM50.2 78.5c7.2-4.8 13.5-3.4 18.4 4.2-8.2 1.6-14.4.2-18.4-4.2Z" fill="url(#leaf)"/>
+  <path d="M48 19v29.7" stroke="#FFF6F8" stroke-width="2.4" stroke-linecap="round" opacity=".5"/>
+</svg>
