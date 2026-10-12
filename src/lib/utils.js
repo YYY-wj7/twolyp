@@ -56,3 +56,35 @@ export function generateId() {
   return crypto.randomUUID ? crypto.randomUUID() :
     Date.now().toString(36) + Math.random().toString(36).slice(2)
 }
+
+/**
+ * Wrap a promise with a timeout. Resolves/rejects with the promise or throws on timeout.
+ */
+export function withTimeout(promise, ms = 15000, label = '') {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(label ? `${label} 超时，请稍后重试` : '请求超时，请稍后重试')), ms)
+    ),
+  ])
+}
+
+/**
+ * Format date to short form: "2026年3月15日"
+ */
+export function formatDateShort(dateStr) {
+  const d = new Date(dateStr)
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
+}
+
+/**
+ * Calculate days until a target date
+ */
+export function daysUntil(targetDate) {
+  const target = new Date(targetDate)
+  const now = new Date()
+  // Reset to midnight for accurate day calculation
+  target.setHours(0, 0, 0, 0)
+  now.setHours(0, 0, 0, 0)
+  return Math.max(0, Math.ceil((target - now) / 86400000))
+}

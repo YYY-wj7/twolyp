@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Image, Film, MapPin, Tag, Calendar, ChevronDown, Check, Loader2 } from 'lucide-react'
-import { cn } from '../lib/utils'
+import { X, Image, MapPin, Tag, Calendar, ChevronDown, Check, Loader2 } from 'lucide-react'
+import { cn, withTimeout } from '../lib/utils'
 import { CATEGORIES } from '../lib/constants'
 import { useAuth } from '../contexts/AppContext'
 import { supabase } from '../lib/supabase'
@@ -20,9 +20,18 @@ export default function CreatePage() {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState('')
   const [error, setError] = useState('')
   const fileInputRef = useRef(null)
-  const videoInputRef = useRef(null)
+
+  // Clean up object URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      media.forEach(m => {
+        if (m.preview) URL.revokeObjectURL(m.preview)
+      })
+    }
+  }, [media])
 
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -41,10 +50,9 @@ export default function CreatePage() {
       id: crypto.randomUUID?.() || Date.now().toString(36) + Math.random().toString(36).slice(2),
       file,
       preview: URL.createObjectURL(file),
-      type: file.type.startsWith('video/') ? 'video' : 'image',
+      type: 'image',
     }))
     setMedia(prev => [...prev, ...newMedia])
-    // Reset input so same file can be selected again
     e.target.value = ''
   }
 
@@ -66,39 +74,51 @@ export default function CreatePage() {
 
     try {
       // 1. Create the record
-      const { data: record, error: recordError } = await supabase
-        .from('records')
-        .insert({
-          garden_id: gardenId,
-          author_id: user.id,
-          title: title || '',
-          content: content || '',
-          category: category || 'daily',
-          custom_tags: tags,
-          location_name: locationName || '',
-          recorded_at: date,
-        })
-        .select()
-        .single()
+      setUploadProgress('保存记录...')
+      const { data: record, error: recordError } = await withTimeout(
+        supabase
+          .from('records')
+          .insert({
+            garden_id: gardenId,
+            author_id: user.id,
+            title: title || '',
+            content: content || '',
+            category: category || 'daily',
+            custom_tags: tags,
+            location_name: locationName || '',
+            recorded_at: date,
+          })
+          .select()
+          .single(),
+        15000,
+        '保存记录'
+      )
 
       if (recordError) throw new Error('保存记录失败: ' + recordError.message)
 
       // 2. Upload images if any
       const imageFiles = media.filter(m => m.type === 'image').map(m => m.file)
       if (imageFiles.length > 0) {
+        setUploadProgress(`上传 ${imageFiles.length} 张照片...`)
         const mediaEntries = await uploadImages(imageFiles, gardenId, record.id)
 
         // 3. Save media entries to database
         if (mediaEntries.length > 0) {
-          const { error: mediaError } = await supabase
-            .from('media')
-            .insert(mediaEntries)
-          if (mediaError) console.warn('Media insert warning:', mediaError.message)
+          setUploadProgress('保存照片信息...')
+          const { error: mediaError } = await withTimeout(
+            supabase
+              .from('media')
+              .insert(mediaEntries),
+            15000,
+            '保存照片信息'
+          )
+          if (mediaError) throw new Error('保存照片信息失败: ' + mediaError.message)
         }
       }
 
+      setUploadProgress('')
       // 4. Navigate back to feed
-      navigate('/feed')
+      navigate('/feed', { replace: true })
     } catch (err) {
       setError(err.message || '发布失败，请重试')
     } finally {
@@ -109,7 +129,7 @@ export default function CreatePage() {
   return (
     <div className="min-h-dvh bg-milk-50 dark:bg-dark-bg flex flex-col transition-theme">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 bg-milk-50/90 dark:bg-dark-bg/90 backdrop-blur-xl safe-top">
+      <header className="sticky top-0 z-40 glass dark:glass-dark safe-top">
         <div className="flex items-center justify-between h-12 px-4">
           <button
             onClick={() => navigate(-1)}
@@ -117,30 +137,30 @@ export default function CreatePage() {
           >
             <X className="w-5 h-5 text-milk-600 dark:text-milk-400" />
           </button>
-          <h1 className="text-base font-medium text-milk-900 dark:text-milk-100">
+          <h1 className="text-base font-semibold text-milk-900 dark:text-milk-100">
             新记录
           </h1>
           <button
             onClick={handlePublish}
             disabled={isPublishing || (!title && media.length === 0)}
             className={cn(
-              'px-5 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5',
+              'px-5 py-1.5 rounded-full text-sm font-semibold transition-all flex items-center gap-1.5',
               isPublishing
                 ? 'bg-milk-200 dark:bg-dark-border text-milk-400 cursor-not-allowed'
                 : title || media.length > 0
-                  ? 'bg-apricot-400 text-white active:scale-95'
+                  ? 'gradient-coral text-white shadow-sm active:scale-95'
                   : 'bg-milk-200 dark:bg-dark-border text-milk-400 cursor-not-allowed'
             )}
           >
             {isPublishing && <Loader2 className="w-4 h-4 animate-spin" />}
-            {isPublishing ? '发布中' : '发布'}
+            {isPublishing ? (uploadProgress || '发布中') : '发布'}
           </button>
         </div>
       </header>
 
       {/* Error message */}
       {error && (
-        <div className="mx-4 mt-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-sm text-red-600 dark:text-red-400">
+        <div className="mx-4 mt-2 px-3 py-2 rounded-xl bg-tulip-50 dark:bg-tulip-900/20 border border-tulip-100 dark:border-tulip-800/30 text-sm text-tulip-600 dark:text-tulip-400">
           {error}
         </div>
       )}
@@ -161,22 +181,13 @@ export default function CreatePage() {
           <div className="grid grid-cols-3 gap-2">
             {media.map((item) => (
               <div key={item.id} className="relative aspect-square rounded-xl overflow-hidden group">
-                {item.type === 'video' ? (
-                  <video src={item.preview} className="w-full h-full object-cover" />
-                ) : (
-                  <img src={item.preview} alt="" className="w-full h-full object-cover" />
-                )}
+                <img src={item.preview} alt="" className="w-full h-full object-cover" />
                 <button
                   onClick={() => handleRemoveMedia(item.id)}
                   className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center"
                 >
                   <X className="w-3.5 h-3.5 text-white" />
                 </button>
-                {item.type === 'video' && (
-                  <div className="absolute bottom-1.5 left-1.5">
-                    <Film className="w-4 h-4 text-white drop-shadow" />
-                  </div>
-                )}
               </div>
             ))}
             {/* Add more button */}
@@ -294,16 +305,9 @@ export default function CreatePage() {
         onChange={handleFileSelect}
         className="hidden"
       />
-      <input
-        ref={videoInputRef}
-        type="file"
-        accept="video/*"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
 
       {/* Bottom action bar */}
-      <div className="sticky bottom-0 bg-white/90 dark:bg-dark-surface/90 backdrop-blur-xl border-t border-milk-200 dark:border-dark-border px-4 py-3 safe-bottom">
+      <div className="sticky bottom-0 glass dark:glass-dark border-t border-milk-200/60 dark:border-dark-border/60 px-4 py-3 safe-bottom">
         <div className="flex items-center gap-3">
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -311,13 +315,6 @@ export default function CreatePage() {
           >
             <Image className="w-5 h-5" />
             照片
-          </button>
-          <button
-            onClick={() => videoInputRef.current?.click()}
-            className="flex items-center gap-1.5 text-sm text-milk-600 dark:text-milk-400 hover:text-apricot-500 transition-colors"
-          >
-            <Film className="w-5 h-5" />
-            视频
           </button>
         </div>
       </div>

@@ -3,20 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Heart, Copy, Check, Sparkles } from 'lucide-react'
 import { useAuth } from '../contexts/AppContext'
 import { supabase } from '../lib/supabase'
-import { cn } from '../lib/utils'
+import { cn, withTimeout } from '../lib/utils'
 
 export default function OnboardingPage() {
   const navigate = useNavigate()
   const { user, inviteCode, gardenId, garden } = useAuth()
 
-  // If user already has nickname, start at step 2 (invite); otherwise step 1 (nickname)
   const initialStep = user?.nickname ? 1 : 0
   const [step, setStep] = useState(initialStep)
   const [nickname, setNickname] = useState(user?.nickname || '')
   const [saving, setSaving] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [error, setError] = useState('')
 
-  // Keep step in sync if user loads after mount
   useEffect(() => {
     if (user?.nickname && step === 0) {
       setStep(1)
@@ -31,16 +30,19 @@ export default function OnboardingPage() {
 
     setSaving(true)
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ nickname: trimmed })
-        .eq('id', user.id)
+      const { error } = await withTimeout(
+        supabase
+          .from('profiles')
+          .update({ nickname: trimmed })
+          .eq('id', user.id),
+        10000, '保存昵称'
+      )
 
       if (error) throw error
-
       setStep(1)
     } catch (err) {
       console.error('Failed to save nickname:', err)
+      setError('保存失败，请重试')
     } finally {
       setSaving(false)
     }
@@ -65,8 +67,11 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-dvh flex flex-col bg-milk-50 dark:bg-dark-bg transition-theme">
+      {/* Subtle background pattern */}
+      <div className="tulip-bg" />
+
       {/* Progress dots */}
-      <div className="flex items-center justify-center gap-2 pt-12 pb-6">
+      <div className="flex items-center justify-center gap-2 pt-12 pb-6 relative z-10">
         {Array.from({ length: totalSteps }).map((_, i) => (
           <div
             key={i}
@@ -83,18 +88,14 @@ export default function OnboardingPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-8 animate-fade-in">
+      <div className="flex-1 flex flex-col items-center justify-center px-8 animate-fade-in relative z-10">
         {step === 0 && (
           <div className="w-full max-w-sm flex flex-col items-center">
-            <div className={cn(
-              'w-28 h-28 rounded-3xl bg-gradient-to-br flex items-center justify-center mb-8',
-              'shadow-xl',
-              'from-apricot-300 to-apricot-400'
-            )}>
+            <div className="w-28 h-28 rounded-3xl gradient-coral flex items-center justify-center mb-8 shadow-lg glow-coral">
               <Sparkles className="w-14 h-14 text-white" strokeWidth={1.5} />
             </div>
 
-            <h1 className="text-2xl font-semibold text-milk-900 dark:text-milk-100 mb-2">
+            <h1 className="text-2xl font-bold text-milk-900 dark:text-milk-100 mb-2">
               设置你的昵称
             </h1>
             <p className="text-sm text-milk-500 dark:text-milk-400 text-center mb-8">
@@ -114,7 +115,7 @@ export default function OnboardingPage() {
                 'text-milk-900 dark:text-milk-100',
                 'placeholder:text-milk-400 dark:placeholder:text-milk-500',
                 'focus:outline-none focus:ring-2 focus:ring-apricot-300 dark:focus:ring-apricot-400',
-                'transition-shadow'
+                'shadow-card transition-shadow'
               )}
             />
           </div>
@@ -122,15 +123,11 @@ export default function OnboardingPage() {
 
         {step === 1 && (
           <div className="w-full max-w-sm flex flex-col items-center">
-            <div className={cn(
-              'w-28 h-28 rounded-3xl bg-gradient-to-br flex items-center justify-center mb-8',
-              'shadow-xl',
-              'from-tulip-300 to-tulip-400'
-            )}>
+            <div className="w-28 h-28 rounded-3xl gradient-rose flex items-center justify-center mb-8 shadow-lg">
               <Heart className="w-14 h-14 text-white" strokeWidth={1.5} />
             </div>
 
-            <h1 className="text-2xl font-semibold text-milk-900 dark:text-milk-100 mb-2">
+            <h1 className="text-2xl font-bold text-milk-900 dark:text-milk-100 mb-2">
               邀请你的 TA
             </h1>
 
@@ -140,11 +137,7 @@ export default function OnboardingPage() {
                   把这个邀请码发给 TA，TA 注册时输入即可加入花园
                 </p>
 
-                <div className={cn(
-                  'w-full flex items-center justify-between px-5 py-4 rounded-2xl',
-                  'bg-white dark:bg-dark-card',
-                  'border border-milk-200 dark:border-dark-border'
-                )}>
+                <div className="w-full flex items-center justify-between px-5 py-4 rounded-2xl bg-white dark:bg-dark-card border border-milk-200 dark:border-dark-border shadow-card">
                   <span className="text-2xl font-mono font-bold tracking-widest text-apricot-500 dark:text-apricot-400">
                     {inviteCode || '------'}
                   </span>
@@ -177,14 +170,10 @@ export default function OnboardingPage() {
                   你们正在共同创建花园，开始记录属于你们的回忆吧
                 </p>
 
-                <div className={cn(
-                  'w-full flex items-center justify-center px-5 py-6 rounded-2xl',
-                  'bg-white dark:bg-dark-card',
-                  'border border-milk-200 dark:border-dark-border'
-                )}>
+                <div className="w-full flex items-center justify-center px-5 py-6 rounded-2xl bg-white dark:bg-dark-card border border-milk-200 dark:border-dark-border shadow-card">
                   <div className="flex items-center gap-3">
-                    <Heart className="w-5 h-5 text-tulip-400" />
-                    <p className="text-sm text-milk-600 dark:text-milk-300">
+                    <Heart className="w-5 h-5 text-tulip-400 fill-tulip-400" />
+                    <p className="text-sm text-milk-700 dark:text-milk-300 font-medium">
                       {garden?.name || '你们的花园'}
                     </p>
                   </div>
@@ -196,32 +185,35 @@ export default function OnboardingPage() {
       </div>
 
       {/* Bottom action */}
-      <div className="px-8 pb-12 safe-bottom">
+      <div className="px-8 pb-12 safe-bottom relative z-10">
         {step === 0 && (
-          <button
-            onClick={handleSaveNickname}
-            disabled={!nickname.trim() || saving}
-            className={cn(
-              'w-full h-14 rounded-2xl font-medium text-white flex items-center justify-center gap-2',
-              'bg-gradient-to-r from-apricot-400 to-tulip-400',
-              'active:scale-[0.98] transition-transform',
-              'shadow-lg shadow-apricot-300/30',
-              (!nickname.trim() || saving) && 'opacity-50 pointer-events-none'
+          <>
+            {error && (
+              <p className="text-sm text-tulip-500 text-center mb-3">{error}</p>
             )}
-          >
-            {saving ? '保存中...' : '下一步'}
-            {!saving && <ChevronRight className="w-5 h-5" />}
-          </button>
+            <button
+              onClick={handleSaveNickname}
+              disabled={!nickname.trim() || saving}
+              className={cn(
+                'w-full h-14 rounded-2xl font-semibold text-white flex items-center justify-center gap-2',
+                'gradient-coral active:scale-[0.98] transition-transform',
+                'shadow-lg glow-coral',
+                (!nickname.trim() || saving) && 'opacity-50 pointer-events-none'
+              )}
+            >
+              {saving ? '保存中...' : '下一步'}
+              {!saving && <ChevronRight className="w-5 h-5" />}
+            </button>
+          </>
         )}
 
         {step === 1 && (
           <button
             onClick={handleFinish}
             className={cn(
-              'w-full h-14 rounded-2xl font-medium text-white flex items-center justify-center gap-2',
-              'bg-gradient-to-r from-apricot-400 to-tulip-400',
-              'active:scale-[0.98] transition-transform',
-              'shadow-lg shadow-apricot-300/30'
+              'w-full h-14 rounded-2xl font-semibold text-white flex items-center justify-center gap-2',
+              'gradient-coral active:scale-[0.98] transition-transform',
+              'shadow-lg glow-coral'
             )}
           >
             开始使用

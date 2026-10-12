@@ -17,12 +17,12 @@ const pwaConfig = {
     name: 'TwoLyp \u2014 Two of us, one garden',
     short_name: 'TwoLyp',
     description: 'Our private garden of memories',
-    theme_color: '#D4A574',
-    background_color: '#FDF6F0',
+    theme_color: '#F4728B',
+    background_color: '#FFFAFA',
     display: 'standalone',
     orientation: 'portrait',
-    scope: '/',
-    start_url: '/',
+    scope: '/twolyp/',
+    start_url: '/twolyp/',
     icons: [
       { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
       { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
@@ -45,6 +45,7 @@ const pwaConfig = {
 }
 
 export default defineConfig({
+  base: '/twolyp/',
   plugins: [
     react(),
     tailwindcss(),

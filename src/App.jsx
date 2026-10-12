@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AppContext'
 import { DBProvider } from './contexts/AppContext'
 
@@ -41,18 +41,33 @@ function ProtectedRoute({ children }) {
 }
 
 /**
- * Guest route — redirects to feed if already logged in
+ * Guest route — redirects to appropriate page if already logged in
  */
 function GuestRoute({ children }) {
   const { user } = useAuth()
-
-  if (user) return <Navigate to="/feed" replace />
+  if (user) {
+    const target = window.__twoLypRedirectTo || '/feed'
+    window.__twoLypRedirectTo = null
+    return <Navigate to={target} replace />
+  }
   return children
+}
+
+/**
+ * Smart redirect for root and catch-all routes.
+ * Checks auth state and redirect flag to route correctly.
+ */
+function SmartRedirect() {
+  const { user } = useAuth()
+  if (!user) return <Navigate to="/login" replace />
+  const target = window.__twoLypRedirectTo || '/feed'
+  window.__twoLypRedirectTo = null
+  return <Navigate to={target} replace />
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AuthProvider>
         <DBProvider>
           <div className="tulip-bg" />
@@ -84,6 +99,9 @@ export default function App() {
             <Route path="/record/:id" element={
               <ProtectedRoute><RecordDetailPage /></ProtectedRoute>
             } />
+            <Route path="/journey" element={
+              <ProtectedRoute><JourneyPage /></ProtectedRoute>
+            } />
             <Route path="/journey/:id" element={
               <ProtectedRoute><JourneyPage /></ProtectedRoute>
             } />
@@ -91,12 +109,12 @@ export default function App() {
               <ProtectedRoute><AnnualReportPage /></ProtectedRoute>
             } />
 
-            {/* Default redirect */}
-            <Route path="/" element={<Navigate to="/feed" replace />} />
-            <Route path="*" element={<Navigate to="/feed" replace />} />
+            {/* Default redirect — check if user needs onboarding */}
+            <Route path="/" element={<SmartRedirect />} />
+            <Route path="*" element={<SmartRedirect />} />
           </Routes>
         </DBProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   )
 }

@@ -1,50 +1,66 @@
 @import "tailwindcss";
 
 /* ============================================
-   TwoLyp Theme — Warm Apricot / Milk Tea
+   TwoLyp Theme — Coral Romance / Warm Pink
    ============================================ */
 @theme {
-  /* Primary: Warm Apricot */
-  --color-apricot-50: #FDF6F0;
-  --color-apricot-100: #FAEBD7;
-  --color-apricot-200: #F5D5B5;
-  --color-apricot-300: #EDBA8A;
-  --color-apricot-400: #D4A574;
-  --color-apricot-500: #C08B5C;
-  --color-apricot-600: #A67043;
-  --color-apricot-700: #8B5A35;
-  --color-apricot-800: #6F472B;
-  --color-apricot-900: #5A3A24;
+  /* Primary: Coral Pink (warm romantic) */
+  --color-apricot-50: #FFF5F5;
+  --color-apricot-100: #FFE4E6;
+  --color-apricot-200: #FECDD3;
+  --color-apricot-300: #FDA4AF;
+  --color-apricot-400: #F4728B;
+  --color-apricot-500: #E8546E;
+  --color-apricot-600: #CC3D57;
+  --color-apricot-700: #A83248;
+  --color-apricot-800: #7F2638;
+  --color-apricot-900: #5C1B29;
 
-  /* Milk Tea Neutrals */
-  --color-milk-50: #FEFCFA;
-  --color-milk-100: #FDF8F3;
-  --color-milk-200: #F9F0E6;
-  --color-milk-300: #F2E4D4;
-  --color-milk-400: #E8D3BC;
-  --color-milk-500: #D4BFA8;
-  --color-milk-600: #B8A08A;
-  --color-milk-700: #9C8570;
-  --color-milk-800: #7A6555;
-  --color-milk-900: #5C4A3E;
+  /* Warm Neutrals */
+  --color-milk-50: #FFFAFA;
+  --color-milk-100: #FEF4F4;
+  --color-milk-200: #FAE8EA;
+  --color-milk-300: #F2D5D8;
+  --color-milk-400: #E4BFC3;
+  --color-milk-500: #CDA4A9;
+  --color-milk-600: #B08B90;
+  --color-milk-700: #8E6E73;
+  --color-milk-800: #6E5358;
+  --color-milk-900: #4A3238;
 
-  /* Accent: Tulip Pink */
-  --color-tulip-50: #FFF5F7;
-  --color-tulip-100: #FFE0E6;
-  --color-tulip-200: #FFC2CF;
-  --color-tulip-300: #FF9DB2;
-  --color-tulip-400: #FF7A96;
-  --color-tulip-500: #E85D7A;
-  --color-tulip-600: #C44560;
-  --color-tulip-700: #A03449;
-  --color-tulip-800: #7D2838;
-  --color-tulip-900: #5C1E2A;
+  /* Accent: Rose Pink */
+  --color-tulip-50: #FFF1F2;
+  --color-tulip-100: #FFE4E6;
+  --color-tulip-200: #FECDD3;
+  --color-tulip-300: #FDA4AF;
+  --color-tulip-400: #FB7185;
+  --color-tulip-500: #F43F5E;
+  --color-tulip-600: #E11D48;
+  --color-tulip-700: #BE123C;
+  --color-tulip-800: #9F1239;
+  --color-tulip-900: #881337;
+
+  /* Sage Green (positive actions) */
+  --color-sage-50: #F0FDF4;
+  --color-sage-100: #DCFCE7;
+  --color-sage-200: #BBF7D0;
+  --color-sage-300: #86EFAC;
+  --color-sage-400: #4ADE80;
+  --color-sage-500: #22C55E;
+  --color-sage-600: #16A34A;
+
+  /* Peach (warm secondary) */
+  --color-peach-50: #FFF7ED;
+  --color-peach-100: #FFEDD5;
+  --color-peach-200: #FED7AA;
+  --color-peach-300: #FDBA74;
+  --color-peach-400: #FB923C;
 
   /* Dark mode backgrounds */
-  --color-dark-bg: #1A1614;
-  --color-dark-surface: #252019;
-  --color-dark-card: #2E2820;
-  --color-dark-border: #3D352B;
+  --color-dark-bg: #1C1418;
+  --color-dark-surface: #261C21;
+  --color-dark-card: #30242A;
+  --color-dark-border: #42343B;
 
   /* Typography */
   --font-sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
@@ -80,21 +96,44 @@ body {
   }
 }
 
-/* Subtle botanical tulip pattern */
+/* Manual theme overrides (force-dark / force-light via JS class on <html>) */
+html.force-dark body {
+  background-color: var(--color-dark-bg);
+  color: var(--color-milk-200);
+  color-scheme: dark;
+}
+html.force-dark .glass { background: rgba(28, 20, 24, 0.85) !important; }
+html.force-dark .dark\:bg-dark-bg { background-color: var(--color-dark-bg); }
+html.force-dark .dark\:bg-dark-card { background-color: var(--color-dark-card); }
+html.force-dark .dark\:bg-dark-surface { background-color: var(--color-dark-surface); }
+html.force-dark .dark\:bg-dark-border { background-color: var(--color-dark-border); }
+html.force-dark .dark\:text-milk-100 { color: var(--color-milk-100); }
+html.force-dark .dark\:text-milk-200 { color: var(--color-milk-200); }
+html.force-dark .dark\:text-milk-300 { color: var(--color-milk-300); }
+html.force-dark .dark\:text-milk-400 { color: var(--color-milk-400); }
+
+html.force-light body {
+  background-color: var(--color-milk-50);
+  color: var(--color-milk-900);
+  color-scheme: light;
+}
+html.force-light .glass { background: rgba(255, 250, 250, 0.85) !important; }
+
+/* Subtle botanical pattern — hearts & leaves */
 .tulip-bg {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.075;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='168' height='188' viewBox='0 0 168 188'%3E%3Cg fill='none' stroke='%23D4A574' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M84 34c-11-14-27-10-29 6-1 16 11 27 29 34 18-7 30-18 29-34-2-16-18-20-29-6Z' stroke-width='2'/%3E%3Cpath d='M84 34c-7 8-8 20 0 40 8-20 7-32 0-40Z' stroke-width='1.4'/%3E%3Cpath d='M84 74v78' stroke-width='2'/%3E%3Cpath d='M84 108c-18-17-31-8-32 5 15 2 25 0 32-5Zm0 22c17-14 29-5 30 7-13 1-23-1-30-7Z' stroke-width='1.5'/%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23F4728B' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.2'%3E%3Cpath d='M60 28c-8-12-22-8-22 4s14 18 22 22c8-4 22-10 22-22s-14-16-22-4Z'/%3E%3Cpath d='M60 54v30'/%3E%3Cpath d='M60 68c-10-8-18-4-18 3 8 1 14 0 18-3Zm0 12c10-8 18-4 18 3-8 1-14 0-18-3Z'/%3E%3Cpath d='M30 80c-2-4-7-4-7 0s5 5 7 5c2 0 7-1 7-5s-5-4-7 0Z' opacity='.5'/%3E%3Cpath d='M95 35c-2-3-6-3-6 0s4 4 6 4c2 0 6-1 6-4s-4-3-6 0Z' opacity='.5'/%3E%3C/g%3E%3C/svg%3E");
   background-position: center top;
-  background-size: 168px 188px;
+  background-size: 120px 120px;
 }
 
 @media (prefers-color-scheme: dark) {
   .tulip-bg {
-    opacity: 0.055;
+    opacity: 0.04;
   }
 }
 
@@ -121,6 +160,15 @@ body {
   ::-webkit-scrollbar-thumb {
     background: var(--color-dark-border);
   }
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Smooth transitions for theme */
@@ -182,6 +230,16 @@ body {
   animation: slideUp 0.3s ease-out forwards;
 }
 
+/* Shimmer animation for skeleton loading */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
 /* Authentication page */
 .auth-page {
   position: relative;
@@ -214,23 +272,23 @@ body {
 .auth-glow-left {
   top: -100px;
   left: -120px;
-  background: #f2c89d;
+  background: #FDA4AF;
 }
 
 .auth-glow-right {
   right: -130px;
   bottom: -80px;
-  background: #f8a8b9;
+  background: #FB7185;
 }
 
 .auth-panel {
   width: 100%;
   max-width: 100%;
-  border: 1px solid rgba(232, 211, 188, 0.72);
+  border: 1px solid rgba(254, 205, 211, 0.72);
   border-radius: 30px;
   background: rgba(255, 252, 249, 0.88);
   padding: 30px 24px 24px;
-  box-shadow: 0 24px 70px rgba(111, 71, 43, 0.11);
+  box-shadow: 0 24px 70px rgba(244, 114, 139, 0.12);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
@@ -242,8 +300,8 @@ body {
   height: 84px;
   border: 1px solid rgba(255, 255, 255, 0.9);
   border-radius: 26px;
-  background: linear-gradient(145deg, #f8c699 0%, #f39a9f 54%, #f67f9c 100%);
-  box-shadow: 0 16px 34px rgba(196, 69, 96, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  background: linear-gradient(145deg, #FDA4AF 0%, #FB7185 54%, #F43F5E 100%);
+  box-shadow: 0 16px 34px rgba(244, 63, 94, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .auth-tabs {
@@ -251,9 +309,9 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
-  border: 1px solid rgba(232, 211, 188, 0.62);
+  border: 1px solid rgba(254, 205, 211, 0.62);
   border-radius: 16px;
-  background: rgba(249, 240, 230, 0.72);
+  background: rgba(254, 232, 234, 0.72);
 }
 
 .auth-tab {
@@ -271,7 +329,7 @@ body {
 .auth-tab-active {
   color: var(--color-milk-900);
   background: #fff;
-  box-shadow: 0 5px 16px rgba(111, 71, 43, 0.09);
+  box-shadow: 0 5px 16px rgba(244, 114, 139, 0.1);
 }
 
 .auth-choice {
@@ -290,7 +348,7 @@ body {
 .auth-choice-active {
   color: var(--color-apricot-700);
   background: #fff;
-  box-shadow: 0 4px 14px rgba(111, 71, 43, 0.08);
+  box-shadow: 0 4px 14px rgba(244, 114, 139, 0.1);
 }
 
 .auth-field {
@@ -325,7 +383,7 @@ body {
 .auth-field input:focus {
   border-color: var(--color-apricot-400);
   background: #fff;
-  box-shadow: 0 0 0 4px rgba(212, 165, 116, 0.15);
+  box-shadow: 0 0 0 4px rgba(244, 114, 139, 0.12);
 }
 
 .auth-field-icon {
@@ -378,8 +436,8 @@ body {
   height: 54px;
   border: 0;
   border-radius: 16px;
-  background: linear-gradient(100deg, #cf9461 0%, #ec8f91 52%, #f36f91 100%);
-  box-shadow: 0 13px 28px rgba(196, 69, 96, 0.2);
+  background: linear-gradient(100deg, #F4728B 0%, #FB7185 52%, #E11D48 100%);
+  box-shadow: 0 13px 28px rgba(244, 63, 94, 0.22);
   color: #fff;
   font-family: inherit;
   font-size: 15px;
@@ -389,7 +447,7 @@ body {
 }
 
 .auth-primary-button:hover {
-  box-shadow: 0 16px 34px rgba(196, 69, 96, 0.25);
+  box-shadow: 0 16px 34px rgba(244, 63, 94, 0.28);
   transform: translateY(-1px);
 }
 
@@ -423,13 +481,13 @@ body {
 }
 
 .auth-message-error {
-  color: #a03449;
-  background: #fff0f3;
+  color: #BE123C;
+  background: #FFF1F2;
 }
 
 .auth-message-success {
-  color: #56734d;
-  background: #f0f7ed;
+  color: #16A34A;
+  background: #F0FDF4;
 }
 
 .auth-spinner {
@@ -460,14 +518,14 @@ body {
 
 @media (prefers-color-scheme: dark) {
   .auth-panel {
-    border-color: rgba(92, 74, 62, 0.62);
-    background: rgba(37, 32, 25, 0.9);
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
+    border-color: rgba(66, 52, 59, 0.62);
+    background: rgba(38, 28, 33, 0.92);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
   }
 
   .auth-tabs {
     border-color: var(--color-dark-border);
-    background: rgba(26, 22, 20, 0.74);
+    background: rgba(28, 20, 24, 0.74);
   }
 
   .auth-tab-active,
@@ -478,7 +536,7 @@ body {
 
   .auth-field input {
     border-color: var(--color-dark-border);
-    background: rgba(46, 40, 32, 0.92);
+    background: rgba(48, 36, 42, 0.92);
     color: var(--color-milk-100);
   }
 
@@ -489,11 +547,131 @@ body {
 
   .auth-message-error {
     color: var(--color-tulip-200);
-    background: rgba(125, 40, 56, 0.28);
+    background: rgba(159, 18, 57, 0.25);
   }
 
   .auth-message-success {
-    color: #c3d8b9;
-    background: rgba(74, 102, 65, 0.25);
+    color: #bbf7d0;
+    background: rgba(22, 163, 74, 0.2);
   }
+}
+
+/* ============================================
+   Premium Design System — Coral Romance
+   ============================================ */
+
+/* Enhanced card shadow (layered for depth) */
+.shadow-card {
+  box-shadow: 0 1px 3px rgba(74, 50, 56, 0.06), 0 4px 12px rgba(74, 50, 56, 0.04);
+}
+.shadow-card-hover {
+  box-shadow: 0 4px 16px rgba(74, 50, 56, 0.1), 0 8px 24px rgba(74, 50, 56, 0.06);
+}
+
+/* Premium gradient utilities */
+.gradient-coral {
+  background: linear-gradient(135deg, #F4728B 0%, #FDA4AF 50%, #FDBA74 100%);
+}
+.gradient-rose {
+  background: linear-gradient(135deg, #FB7185 0%, #F4728B 50%, #E8546E 100%);
+}
+.gradient-warm {
+  background: linear-gradient(135deg, #FFE4E6 0%, #FFF5F5 50%, #FFEDD5 100%);
+}
+.gradient-hero {
+  background: linear-gradient(135deg, #FB7185 0%, #F4728B 30%, #FDA4AF 60%, #FDBA74 100%);
+}
+
+/* Glow effect for FAB */
+.glow-coral {
+  box-shadow: 0 4px 20px rgba(244, 114, 139, 0.35), 0 0 40px rgba(244, 114, 139, 0.15);
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 250, 250, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.glass-dark {
+  background: rgba(28, 20, 24, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Gentle pulse */
+@keyframes gentlePulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+.animate-gentle-pulse {
+  animation: gentlePulse 2s ease-in-out infinite;
+}
+
+/* Heart beat */
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.15); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.08); }
+}
+.animate-heartbeat {
+  animation: heartBeat 1.5s ease-in-out infinite;
+}
+
+/* Bottom nav pill indicator */
+.nav-pill-active {
+  position: relative;
+}
+.nav-pill-active::before {
+  content: '';
+  position: absolute;
+  inset: -4px -8px;
+  border-radius: 12px;
+  background: rgba(244, 114, 139, 0.1);
+  z-index: -1;
+}
+
+/* Premium empty state */
+.empty-illustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  margin-bottom: 20px;
+}
+
+/* Shimmer border effect */
+@keyframes shimmerBorder {
+  0% { border-color: var(--color-apricot-200); }
+  50% { border-color: var(--color-apricot-300); }
+  100% { border-color: var(--color-apricot-200); }
+}
+
+/* Smooth page entrance */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-page-enter {
+  animation: pageEnter 0.5s ease-out forwards;
+}
+
+/* Scale in */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in {
+  animation: scaleIn 0.4s ease-out forwards;
 }

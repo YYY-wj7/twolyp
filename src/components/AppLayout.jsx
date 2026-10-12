@@ -22,48 +22,56 @@ export default function AppLayout() {
 
       {/* Bottom navigation bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 safe-bottom">
-        <div className="bg-white/90 dark:bg-dark-surface/90 backdrop-blur-xl border-t border-milk-200 dark:border-dark-border">
-          <div className="flex items-center justify-around h-14 max-w-lg mx-auto">
+        <div className="glass dark:glass-dark border-t border-milk-200/60 dark:border-dark-border/60">
+          <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-2">
             {NAV_ITEMS.map((item) => {
-              // Special create button
+              // Special create button (FAB)
               if (item.isCreate) {
                 return (
                   <NavLink
                     key={item.to}
                     to={item.to}
-                    className="flex items-center justify-center w-12 h-12 -mt-4 rounded-full bg-apricot-400 dark:bg-apricot-500 text-white shadow-lg shadow-apricot-400/30 active:scale-95 transition-transform"
+                    className="flex items-center justify-center w-12 h-12 -mt-5 rounded-full gradient-coral text-white glow-coral active:scale-95 transition-transform"
                   >
                     <Plus className="w-6 h-6" strokeWidth={2.5} />
                   </NavLink>
                 )
               }
 
-              const isActive = location.pathname === item.to
+              const isActive = location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to))
               const Icon = item.icon
 
               return (
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  className="flex flex-col items-center justify-center gap-0.5 w-14 h-full"
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-0.5 w-14 h-full relative transition-all duration-200',
+                    isActive && 'nav-pill-active'
+                  )}
                 >
                   <Icon
                     className={cn(
-                      'w-5 h-5 transition-colors',
+                      'w-5 h-5 transition-all duration-200',
                       isActive
                         ? 'text-apricot-500 dark:text-apricot-400'
                         : 'text-milk-500 dark:text-milk-600'
                     )}
                     strokeWidth={isActive ? 2.2 : 1.8}
+                    fill={isActive && item.to === '/anniversary' ? 'currentColor' : 'none'}
                   />
                   <span className={cn(
-                    'text-[10px] leading-tight transition-colors',
+                    'text-[10px] leading-tight transition-all duration-200',
                     isActive
-                      ? 'text-apricot-600 dark:text-apricot-400 font-medium'
-                      : 'text-milk-500 dark:text-milk-600'
+                      ? 'text-apricot-600 dark:text-apricot-400 font-semibold'
+                      : 'text-milk-500 dark:text-milk-600 font-medium'
                   )}>
                     {item.label}
                   </span>
+                  {/* Active dot indicator */}
+                  {isActive && (
+                    <div className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-apricot-400" />
+                  )}
                 </NavLink>
               )
             })}

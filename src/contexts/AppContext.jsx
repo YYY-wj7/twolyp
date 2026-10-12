@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import Dexie from 'dexie'
 import { supabase } from '../lib/supabase'
+import { withTimeout } from '../lib/utils'
 
 /**
  * Local IndexedDB for offline-first storage.
@@ -137,21 +138,103 @@ export function AuthProvider({ children }) {
       if (!active) return
 
       if (event === 'SIGNED_IN' && session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
+        const userId = session.user.id
+        let profile = null
+        try {
+          const { data } = await withTimeout(
+            supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+            10000, '加载用户信息'
+          )
+          profile = data
+        } catch (e) { console.warn('Profile fetch failed:', e.message) }
 
         const nextUser = {
-          id: session.user.id,
+          id: userId,
           email: session.user.email,
           nickname: profile?.nickname || '',
           avatar: profile?.avatar_url || null,
         }
 
-        // Load garden info on sign in
-        const { gardenId: gid, garden: g } = await loadGardenInfo(session.user.id)
+        // Load garden info
+        let gid = null, g = null
+        try {
+          const info = await loadGardenInfo(userId)
+          gid = info.gardenId
+          g = info.garden
+        } catch (e) { console.warn('Garden load failed:', e.message) }
+
+        // Detect new user: no profile nickname AND no garden
+        const isNewUser = !profile?.nickname && !gid
+
+        if (isNewUser) {
+          // Restore pending registration data from sessionStorage
+          let pendingData = null
+          try {
+            const raw = sessionStorage.getItem('twolyp-pending-reg')
+            if (raw) {
+              pendingData = JSON.parse(raw)
+              sessionStorage.removeItem('twolyp-pending-reg')
+              setPendingRegistration(pendingData)
+            }
+          } catch (e) { /* ignore parse errors */ }
+
+          // Create or join garden for new user
+          if (pendingData?.createGarden) {
+            try {
+              const newInviteCode = generateInviteCode()
+              const { data: gardenData, error: gardenError } = await withTimeout(
+                supabase.from('gardens').insert({
+                  name: '我们的花园',
+                  created_by: userId,
+                  invite_code: newInviteCode,
+                }).select().single(),
+                10000, '创建花园'
+              )
+
+              if (!gardenError && gardenData) {
+                await supabase.from('garden_members').insert({
+                  garden_id: gardenData.id, user_id: userId, role: 'owner',
+                })
+                gid = gardenData.id
+                g = gardenData
+                setGardenId(gid)
+                setGarden(g)
+                setInviteCode(newInviteCode)
+                await db.appSettings.put({ key: 'garden-invite-code', value: newInviteCode })
+              }
+            } catch (e) { console.warn('Garden creation failed:', e.message) }
+          } else if (pendingData?.inviteCode) {
+            try {
+              const { data: inviteData } = await supabase
+                .from('invite_codes')
+                .select('garden_id')
+                .eq('code', pendingData.inviteCode.trim().toUpperCase())
+                .single()
+
+              if (inviteData) {
+                await supabase.from('garden_members').insert({
+                  garden_id: inviteData.garden_id, user_id: userId, role: 'member',
+                })
+                await supabase.from('invite_codes')
+                  .update({ is_used: true, used_by: userId, used_at: new Date().toISOString() })
+                  .eq('code', pendingData.inviteCode.trim().toUpperCase())
+
+                const { data: gardenData } = await supabase
+                  .from('gardens').select('id, name, created_by, invite_code')
+                  .eq('id', inviteData.garden_id).single()
+
+                gid = inviteData.garden_id
+                g = gardenData
+                setGardenId(gid)
+                setGarden(g)
+              }
+            } catch (e) { console.warn('Garden join failed:', e.message) }
+          }
+        }
+
+        // Set redirect BEFORE setUser so GuestRoute can read it
+        window.__twoLypRedirectTo = isNewUser ? '/onboarding' : '/feed'
+
         if (!active) return
         setGardenId(gid)
         setGarden(g)
@@ -227,11 +310,12 @@ export function AuthProvider({ children }) {
       }
     }
 
-    // Sign up with Supabase — this triggers email OTP
+    // Sign up with Supabase — this triggers email confirmation link
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: window.location.origin + import.meta.env.BASE_URL,
         data: {
           invite_code: !createGarden ? code.trim().toUpperCase() : null,
           create_garden: createGarden,
@@ -241,12 +325,14 @@ export function AuthProvider({ children }) {
 
     if (error) {
       if (error.message.includes('already registered')) {
-        throw new Error('该邮箱已注册，请直接登录')
+        throw new Error('该邮箱已注册。如果还没收到确认邮件，请换个邮箱重新注册，或尝试登录。')
       }
       throw new Error(error.message || '注册失败')
     }
 
     setPendingRegistration({ email, inviteCode: code, createGarden, userId: data.user?.id })
+    // Persist to sessionStorage so it survives email confirmation redirect
+    sessionStorage.setItem('twolyp-pending-reg', JSON.stringify({ email, inviteCode: code, createGarden, userId: data.user?.id }))
     return { emailVerificationRequired: true }
   }, [])
 
@@ -348,7 +434,7 @@ export function AuthProvider({ children }) {
     if (!email) throw new Error('请先填写邮箱')
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/login?mode=reset',
+      redirectTo: window.location.origin + import.meta.env.BASE_URL + '#/login?mode=reset',
     })
 
     if (error) throw new Error(error.message || '发送失败')

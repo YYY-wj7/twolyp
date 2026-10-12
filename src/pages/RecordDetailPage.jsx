@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Heart, MessageCircle, MapPin, Share2, MoreHorizontal, Trash2, Send, Loader2 } from 'lucide-react'
-import { cn, formatDate } from '../lib/utils'
-import { useAuth } from '../contexts/AppContext'
+import { ArrowLeft, Heart, MessageCircle, MapPin, Share2, MoreHorizontal, Trash2, Send, Loader2, AlertCircle, RefreshCw } from 'lucide-react'
+import { cn, formatDate, withTimeout } from '../lib/utils'
+import { useAuth, useDB } from '../contexts/AppContext'
 import { supabase } from '../lib/supabase'
 
 export default function RecordDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user, gardenId } = useAuth()
+  const db = useDB()
 
   const [record, setRecord] = useState(null)
   const [media, setMedia] = useState([])
@@ -18,59 +19,138 @@ export default function RecordDetailPage() {
   const [submittingComment, setSubmittingComment] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
+  const [fetchError, setFetchError] = useState(null) // null | 'not_found' | 'network'
+  const [shareToast, setShareToast] = useState('')
 
+  const carouselRef = useRef(null)
+
+  // Load like status from local DB
   useEffect(() => {
-    async function fetchRecord() {
-      if (!id) return
-      setLoading(true)
-      try {
-        // Fetch record
-        const { data: rec, error } = await supabase
+    if (!id || !db) return
+    db.appSettings.get(`liked-${id}`).then(entry => {
+      if (entry?.value) setIsLiked(true)
+    }).catch(() => {})
+  }, [id, db])
+
+  const fetchRecord = useCallback(async () => {
+    if (!id) return
+    setLoading(true)
+    setFetchError(null)
+    try {
+      // Fetch record
+      const { data: rec, error } = await withTimeout(
+        supabase
           .from('records')
           .select('*, profiles!author_id(nickname, email, avatar_url)')
           .eq('id', id)
-          .single()
+          .single(),
+        15000
+      )
 
-        if (error) throw error
-        setRecord(rec)
+      if (error) {
+        if (error.code === 'PGRST116' || error.message?.includes('not found')) {
+          setFetchError('not_found')
+        } else {
+          setFetchError('network')
+        }
+        throw error
+      }
+      setRecord(rec)
 
-        // Fetch media
-        const { data: mediaData } = await supabase
+      // Fetch media
+      const { data: mediaData } = await withTimeout(
+        supabase
           .from('media')
           .select('*')
           .eq('record_id', id)
-          .order('sort_order')
-        setMedia(mediaData || [])
+          .order('sort_order'),
+        15000
+      )
+      setMedia(mediaData || [])
 
-        // Fetch comments with author info
-        const { data: commentData } = await supabase
+      // Fetch comments with author info
+      const { data: commentData } = await withTimeout(
+        supabase
           .from('comments')
           .select('*, profiles!author_id(nickname, email)')
           .eq('record_id', id)
-          .order('created_at', { ascending: true })
-        setComments(commentData || [])
-      } catch (err) {
-        console.error('Failed to fetch record:', err)
-      } finally {
-        setLoading(false)
-      }
+          .order('created_at', { ascending: true }),
+        15000
+      )
+      setComments(commentData || [])
+    } catch (err) {
+      console.error('Failed to fetch record:', err)
+      // If fetchError wasn't already set to 'not_found', set it to 'network'
+      setFetchError(prev => prev || 'network')
+    } finally {
+      setLoading(false)
     }
-    fetchRecord()
   }, [id])
+
+  useEffect(() => {
+    fetchRecord()
+  }, [fetchRecord])
+
+  // IntersectionObserver for carousel dot indicators
+  useEffect(() => {
+    const container = carouselRef.current
+    if (!container || media.length <= 1) return
+
+    const images = container.querySelectorAll('[data-carousel-item]')
+    if (images.length === 0) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const idx = Number(entry.target.dataset.index)
+            setActiveImageIndex(idx)
+          }
+        })
+      },
+      {
+        root: container,
+        threshold: 0.6,
+      }
+    )
+
+    images.forEach(img => observer.observe(img))
+    return () => observer.disconnect()
+  }, [media])
+
+  const handleToggleLike = async () => {
+    const next = !isLiked
+    setIsLiked(next)
+    try {
+      if (next) {
+        await db.appSettings.put({ key: `liked-${id}`, value: true })
+      } else {
+        await db.appSettings.delete(`liked-${id}`)
+      }
+    } catch (e) {
+      console.warn('Failed to persist like:', e)
+    }
+  }
 
   const handleAddComment = async () => {
     if (!commentText.trim() || submittingComment) return
     setSubmittingComment(true)
     try {
-      const { data, error } = await supabase
-        .from('comments')
-        .insert({
-          record_id: id,
-          author_id: user.id,
-          content: commentText.trim(),
-        })
-        .select('*, profiles!author_id(nickname, email)')
-        .single()
+      const { data, error } = await withTimeout(
+        supabase
+          .from('comments')
+          .insert({
+            record_id: id,
+            author_id: user.id,
+            content: commentText.trim(),
+          })
+          .select('*, profiles!author_id(nickname, email)')
+          .single(),
+        15000
+      )
 
       if (error) throw error
       setComments(prev => [...prev, data])
@@ -83,18 +163,56 @@ export default function RecordDetailPage() {
   }
 
   const handleDelete = async () => {
-    if (!confirm('确定要删除这条记录吗？可在回收站中恢复。')) return
+    setDeleting(true)
     try {
-      await supabase
-        .from('records')
-        .update({ is_deleted: true, deleted_at: new Date().toISOString() })
-        .eq('id', id)
+      await withTimeout(
+        supabase
+          .from('records')
+          .update({ is_deleted: true, deleted_at: new Date().toISOString() })
+          .eq('id', id),
+        15000
+      )
+      setShowDeleteModal(false)
       navigate('/feed')
     } catch (err) {
       console.error('Failed to delete:', err)
+    } finally {
+      setDeleting(false)
     }
   }
 
+  const handleShare = async () => {
+    const shareUrl = window.location.href
+    const shareTitle = record?.title || '查看记录'
+    const shareText = record?.content?.slice(0, 100) || ''
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        })
+      } else {
+        await navigator.clipboard.writeText(shareUrl)
+        setShareToast('链接已复制')
+        setTimeout(() => setShareToast(''), 2000)
+      }
+    } catch (err) {
+      // User cancelled share or clipboard failed
+      if (err.name !== 'AbortError') {
+        try {
+          await navigator.clipboard.writeText(shareUrl)
+          setShareToast('链接已复制')
+          setTimeout(() => setShareToast(''), 2000)
+        } catch {
+          console.error('Share failed:', err)
+        }
+      }
+    }
+  }
+
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-dvh bg-white dark:bg-dark-bg flex items-center justify-center">
@@ -103,7 +221,8 @@ export default function RecordDetailPage() {
     )
   }
 
-  if (!record) {
+  // Error states
+  if (fetchError === 'not_found' || (!record && !fetchError)) {
     return (
       <div className="min-h-dvh bg-white dark:bg-dark-bg flex flex-col items-center justify-center">
         <p className="text-milk-500 dark:text-milk-400">记录不存在</p>
@@ -112,28 +231,73 @@ export default function RecordDetailPage() {
     )
   }
 
+  if (fetchError === 'network' && !record) {
+    return (
+      <div className="min-h-dvh bg-white dark:bg-dark-bg flex flex-col items-center justify-center px-6">
+        <AlertCircle className="w-12 h-12 text-tulip-400 mb-3" />
+        <p className="text-milk-700 dark:text-milk-300 text-center mb-1">加载失败</p>
+        <p className="text-sm text-milk-500 dark:text-milk-400 text-center mb-5">网络连接异常，请稍后重试</p>
+        <button
+          onClick={fetchRecord}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-apricot-400 text-white text-sm font-medium active:scale-95 transition-transform"
+        >
+          <RefreshCw className="w-4 h-4" />
+          重新加载
+        </button>
+      </div>
+    )
+  }
+
+  if (!record) return null
+
   const authorName = record.profiles?.nickname || record.profiles?.email?.split('@')[0] || 'Unknown'
   const authorInitial = authorName[0]?.toUpperCase() || '?'
-  const coverImage = media[0]?.compressed_url || media[0]?.original_url || null
+  const hasImages = media.length > 0
 
   return (
-    <div className="min-h-dvh bg-white dark:bg-dark-bg transition-theme">
+    <div className="min-h-dvh bg-white dark:bg-dark-bg transition-theme pb-20">
       {/* Top bar */}
       <header className="fixed top-0 left-0 right-0 z-40 safe-top">
-        <div className="flex items-center justify-between h-12 px-4 bg-gradient-to-b from-black/30 to-transparent">
+        <div className={cn(
+          'flex items-center justify-between h-12 px-4',
+          hasImages
+            ? 'bg-gradient-to-b from-black/30 to-transparent'
+            : 'bg-white/80 dark:bg-dark-bg/80 backdrop-blur-xl border-b border-milk-200/50 dark:border-dark-border/50'
+        )}>
           <button
             onClick={() => navigate(-1)}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-black/20 backdrop-blur-sm"
+            className={cn(
+              'w-9 h-9 flex items-center justify-center rounded-full backdrop-blur-sm',
+              hasImages
+                ? 'bg-black/20'
+                : 'bg-milk-100 dark:bg-dark-card'
+            )}
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeft className={cn('w-5 h-5', hasImages ? 'text-white' : 'text-milk-800 dark:text-milk-200')} />
           </button>
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleShare}
+              className={cn(
+                'w-9 h-9 flex items-center justify-center rounded-full backdrop-blur-sm',
+                hasImages
+                  ? 'bg-black/20'
+                  : 'bg-milk-100 dark:bg-dark-card'
+              )}
+            >
+              <Share2 className={cn('w-4 h-4', hasImages ? 'text-white' : 'text-milk-800 dark:text-milk-200')} />
+            </button>
             {record.author_id === user?.id && (
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-black/20 backdrop-blur-sm"
+                className={cn(
+                  'w-9 h-9 flex items-center justify-center rounded-full backdrop-blur-sm',
+                  hasImages
+                    ? 'bg-black/20'
+                    : 'bg-milk-100 dark:bg-dark-card'
+                )}
               >
-                <MoreHorizontal className="w-4 h-4 text-white" />
+                <MoreHorizontal className={cn('w-4 h-4', hasImages ? 'text-white' : 'text-milk-800 dark:text-milk-200')} />
               </button>
             )}
           </div>
@@ -142,7 +306,7 @@ export default function RecordDetailPage() {
         {showMenu && (
           <div className="absolute top-12 right-4 bg-white dark:bg-dark-card rounded-xl shadow-lg border border-milk-200 dark:border-dark-border overflow-hidden z-50">
             <button
-              onClick={() => { setShowMenu(false); handleDelete() }}
+              onClick={() => { setShowMenu(false); setShowDeleteModal(true) }}
               className="flex items-center gap-2 px-4 py-3 text-sm text-red-500 hover:bg-milk-50 dark:hover:bg-dark-border w-full"
             >
               <Trash2 className="w-4 h-4" />
@@ -152,11 +316,39 @@ export default function RecordDetailPage() {
         )}
       </header>
 
-      {/* Hero image */}
-      {coverImage && (
+      {/* Share toast */}
+      {shareToast && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-dark-card/90 text-white text-sm shadow-lg animate-fade-in">
+          {shareToast}
+        </div>
+      )}
+
+      {/* Image carousel */}
+      {hasImages && (
         <div className="relative">
-          <div className="aspect-[4/5] overflow-hidden">
-            <img src={coverImage} alt={record.title} className="w-full h-full object-cover" />
+          <div
+            ref={carouselRef}
+            className="flex overflow-x-auto scroll-smooth [scroll-snap-type:x_mandatory] no-scrollbar"
+          >
+            {media.map((item, i) => {
+              const imgUrl = item.compressed_url || item.original_url
+              return (
+                <div
+                  key={item.id || i}
+                  data-carousel-item
+                  data-index={i}
+                  className="w-full flex-shrink-0 [scroll-snap-align:start]"
+                >
+                  <div className="aspect-[4/5] overflow-hidden">
+                    <img
+                      src={imgUrl}
+                      alt={`${record.title || '图片'} ${i + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              )
+            })}
           </div>
           {media.length > 1 && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
@@ -164,8 +356,8 @@ export default function RecordDetailPage() {
                 <div
                   key={i}
                   className={cn(
-                    'w-1.5 h-1.5 rounded-full transition-all',
-                    i === 0 ? 'bg-white w-4' : 'bg-white/50'
+                    'h-1.5 rounded-full transition-all duration-300',
+                    i === activeImageIndex ? 'bg-white w-4' : 'bg-white/50 w-1.5'
                   )}
                 />
               ))}
@@ -177,7 +369,7 @@ export default function RecordDetailPage() {
       {/* Content */}
       <div className={cn(
         'relative bg-white dark:bg-dark-bg px-5 pt-6 pb-8',
-        coverImage && '-mt-6 rounded-t-3xl'
+        hasImages && '-mt-6 rounded-t-3xl'
       )}>
         {/* Author & date */}
         <div className="flex items-center gap-3 mb-4">
@@ -233,7 +425,7 @@ export default function RecordDetailPage() {
         {/* Interaction bar */}
         <div className="flex items-center gap-6 py-4 border-t border-b border-milk-200 dark:border-dark-border">
           <button
-            onClick={() => setIsLiked(!isLiked)}
+            onClick={handleToggleLike}
             className="flex items-center gap-1.5"
           >
             <Heart className={cn('w-5 h-5 transition-colors', isLiked ? 'text-tulip-500 fill-tulip-500' : 'text-milk-500')} />
@@ -277,9 +469,11 @@ export default function RecordDetailPage() {
             )
           })}
         </div>
+      </div>
 
-        {/* Comment input */}
-        <div className="mt-6 flex items-center gap-3">
+      {/* Sticky comment input */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-dark-bg/90 backdrop-blur-xl border-t border-milk-200 dark:border-dark-border safe-bottom">
+        <div className="flex items-center gap-3 px-5 py-3">
           <input
             type="text"
             placeholder="说点什么..."
@@ -297,6 +491,54 @@ export default function RecordDetailPage() {
           </button>
         </div>
       </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => !deleting && setShowDeleteModal(false)}
+          />
+          <div className="relative w-full max-w-lg bg-white dark:bg-dark-card rounded-t-2xl p-6 pb-8 animate-slide-up">
+            <div className="w-10 h-1 bg-milk-200 dark:bg-dark-border rounded-full mx-auto mb-5" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-500" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-milk-900 dark:text-milk-100">
+                  删除记录
+                </h3>
+                <p className="text-sm text-milk-500 dark:text-milk-400">
+                  确定要删除这条记录吗？可在回收站中恢复。
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => !deleting && setShowDeleteModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-milk-200 dark:border-dark-border text-sm text-milk-600 dark:text-milk-400 active:scale-95 transition-transform"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-medium active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {deleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    确认删除
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

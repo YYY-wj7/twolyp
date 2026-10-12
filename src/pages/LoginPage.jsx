@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AppContext'
 import {
@@ -21,9 +21,9 @@ export default function LoginPage() {
   const [searchParams] = useSearchParams()
   const initialInviteCode = searchParams.get('invite')?.trim().toUpperCase() || ''
   const {
+    user,
     login,
     register,
-    verifyEmail,
     resendVerification,
     requestPasswordReset,
     resetPassword,
@@ -39,9 +39,19 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [resendCooldown, setResendCooldown] = useState(0)
+
+  // Auto-redirect when user signs in via email confirmation link
+  useEffect(() => {
+    if (user && mode === 'waiting') {
+      const redirectTo = window.__twoLypRedirectTo || '/onboarding'
+      window.__twoLypRedirectTo = null
+      navigate(redirectTo)
+    }
+  }, [user, mode, navigate])
 
   const title = useMemo(() => {
-    if (mode === 'verify') return '验证邮箱'
+    if (mode === 'waiting') return '验证邮箱'
     if (mode === 'forgot') return '找回密码'
     if (mode === 'reset') return '设置新密码'
     if (mode === 'register') return registerType === 'create' ? '创建你们的花园' : '加入 TA 的花园'
@@ -56,6 +66,7 @@ export default function LoginPage() {
     setShowPassword(false)
     setError('')
     setNotice('')
+    setResendCooldown(0)
   }
 
   const validateRegistration = () => {
@@ -76,7 +87,9 @@ export default function LoginPage() {
       if (mode === 'login') {
         if (!EMAIL_PATTERN.test(email)) throw new Error('请输入有效的邮箱地址')
         await login(email, password)
-        navigate('/feed')
+        const target = window.__twoLypRedirectTo || '/feed'
+        window.__twoLypRedirectTo = null
+        navigate(target)
         return
       }
 
@@ -90,8 +103,8 @@ export default function LoginPage() {
           inviteCode: registerType === 'join' ? inviteCode.trim() : null,
           createGarden: registerType === 'create',
         })
-        setMode('verify')
-        setNotice('6 位验证码已发送到你的邮箱')
+        setMode('waiting')
+        setNotice('确认邮件已发送，请点击邮件中的链接完成验证')
         return
       }
 
@@ -118,9 +131,6 @@ export default function LoginPage() {
         setNotice('密码已更新，请使用新密码登录')
         return
       }
-
-      await verifyEmail(email, verificationCode)
-      navigate('/onboarding')
     } catch (err) {
       setError(err.message || '操作失败，请稍后重试')
     } finally {
@@ -129,6 +139,7 @@ export default function LoginPage() {
   }
 
   const handleResend = async () => {
+    if (resendCooldown > 0) return
     setError('')
     setNotice('')
     setIsLoading(true)
@@ -138,9 +149,16 @@ export default function LoginPage() {
       } else {
         await resendVerification(email)
       }
-      setNotice('新的验证码已发送，请检查邮箱')
+      setNotice('新的验证码已发送，请检查邮箱（含垃圾箱）')
+      setResendCooldown(60)
+      const timer = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) { clearInterval(timer); return 0 }
+          return prev - 1
+        })
+      }, 1000)
     } catch (err) {
-      setError(err.message || '验证码发送失败')
+      setError(err.message || '验证码发送失败，请稍后再试')
     } finally {
       setIsLoading(false)
     }
@@ -156,7 +174,7 @@ export default function LoginPage() {
         <section className="auth-panel animate-fade-in">
           <div className="flex flex-col items-center text-center">
             <div className="brand-mark" aria-label="TwoLyp 郁金香标识">
-              <img src="/favicon.svg" alt="" className="h-[58px] w-[58px]" />
+              <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="h-[58px] w-[58px]" />
             </div>
             <h1 className="mt-4 text-[30px] font-semibold tracking-[-0.04em] text-milk-900 dark:text-milk-100">
               TwoLyp
@@ -190,14 +208,14 @@ export default function LoginPage() {
           )}
 
           <div className="mt-6">
-            {(mode === 'verify' || mode === 'forgot' || mode === 'reset') && (
+            {(mode === 'waiting' || mode === 'forgot' || mode === 'reset') && (
               <button
                 type="button"
-                onClick={() => switchMode(mode === 'verify' ? 'register' : 'login')}
+                onClick={() => switchMode(mode === 'waiting' ? 'register' : 'login')}
                 className="mb-4 inline-flex items-center gap-1 text-sm text-milk-600 transition-colors hover:text-apricot-600 dark:text-milk-400"
               >
                 <ArrowLeft className="h-4 w-4" />
-                {mode === 'verify' ? '返回修改邮箱' : '返回登录'}
+                {mode === 'waiting' ? '返回修改邮箱' : '返回登录'}
               </button>
             )}
 
@@ -207,7 +225,7 @@ export default function LoginPage() {
                 {mode === 'login' && '登录后继续翻阅只属于你们的回忆。'}
                 {mode === 'register' && registerType === 'create' && '第一位用户先创建花园，之后再生成邀请码邀请另一位。'}
                 {mode === 'register' && registerType === 'join' && '和 TA 一起创建你们的花园。'}
-                {mode === 'verify' && <>验证码已发送至 <span className="font-medium text-milk-800 dark:text-milk-200">{email}</span></>}
+                {mode === 'waiting' && <>确认邮件已发送至 <span className="font-medium text-milk-800 dark:text-milk-200">{email}</span>，请打开邮件并点击确认链接。</>}
                 {mode === 'forgot' && '输入注册邮箱，我们会发送一次性验证码。'}
                 {mode === 'reset' && <>请使用发送至 <span className="font-medium text-milk-800 dark:text-milk-200">{email}</span> 的验证码设置新密码。</>}
               </p>
@@ -322,38 +340,29 @@ export default function LoginPage() {
                 </label>
               )}
 
-              {mode === 'verify' && (
-                <label className="auth-field auth-code-field">
-                  <Mail className="auth-field-icon" aria-hidden="true" />
-                  <span className="sr-only">邮箱验证码</span>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    placeholder="输入 6 位验证码"
-                    value={verificationCode}
-                    onChange={(event) => setVerificationCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                    maxLength={6}
-                    required
-                  />
-                </label>
-              )}
-
               {error && <p role="alert" className="auth-message auth-message-error">{error}</p>}
               {notice && <p role="status" aria-live="polite" className="auth-message auth-message-success">{notice}</p>}
 
-              <button
-                type="submit"
-                disabled={isLoading || ((mode === 'verify' || mode === 'reset') && verificationCode.length !== 6)}
-                className="auth-primary-button"
-              >
-                {isLoading && <span className="auth-spinner" aria-hidden="true" />}
-                {mode === 'login' && (isLoading ? '正在登录' : '安全登录')}
-                {mode === 'register' && (isLoading ? '正在创建' : '注册并验证邮箱')}
-                {mode === 'verify' && (isLoading ? '正在验证' : '完成验证')}
-                {mode === 'forgot' && (isLoading ? '正在发送' : '发送重置验证码')}
-                {mode === 'reset' && (isLoading ? '正在更新' : '确认新密码')}
-              </button>
+              {mode !== 'waiting' && (
+                <button
+                  type="submit"
+                  disabled={isLoading || (mode === 'reset' && verificationCode.length !== 6)}
+                  className="auth-primary-button"
+                >
+                  {isLoading && <span className="auth-spinner" aria-hidden="true" />}
+                  {mode === 'login' && (isLoading ? '正在登录' : '安全登录')}
+                  {mode === 'register' && (isLoading ? '正在创建' : '注册并验证邮箱')}
+                  {mode === 'forgot' && (isLoading ? '正在发送' : '发送重置验证码')}
+                  {mode === 'reset' && (isLoading ? '正在更新' : '确认新密码')}
+                </button>
+              )}
+
+              {mode === 'waiting' && (
+                <div className="flex flex-col items-center gap-3 py-4">
+                  <div className="auth-spinner" aria-hidden="true" style={{ width: 28, height: 28 }} />
+                  <p className="text-sm text-milk-600 dark:text-milk-400">等待你点击邮件中的确认链接…</p>
+                </div>
+              )}
 
               {mode === 'login' && (
                 <button type="button" onClick={() => switchMode('forgot')} className="auth-text-button">
@@ -361,15 +370,15 @@ export default function LoginPage() {
                 </button>
               )}
 
-              {mode === 'verify' && (
-                <button type="button" onClick={handleResend} disabled={isLoading} className="auth-text-button">
-                  {isLoading ? '正在发送…' : '没收到？重新发送验证码'}
+              {mode === 'waiting' && (
+                <button type="button" onClick={handleResend} disabled={isLoading || resendCooldown > 0} className="auth-text-button">
+                  {isLoading ? '正在发送…' : resendCooldown > 0 ? `请等待 ${resendCooldown} 秒后重试` : '没收到？重新发送确认邮件'}
                 </button>
               )}
 
               {mode === 'reset' && (
-                <button type="button" onClick={handleResend} disabled={isLoading} className="auth-text-button">
-                  {isLoading ? '正在发送…' : '没收到？重新发送重置验证码'}
+                <button type="button" onClick={handleResend} disabled={isLoading || resendCooldown > 0} className="auth-text-button">
+                  {isLoading ? '正在发送…' : resendCooldown > 0 ? `请等待 ${resendCooldown} 秒后重试` : '没收到？重新发送重置验证码'}
                 </button>
               )}
             </form>
