@@ -4,10 +4,11 @@
 
 // Fixed categories for content organization
 export const CATEGORIES = [
+  { id: 'daily', label: '日常', icon: 'Sun', emoji: '☀️' },
   { id: 'travel', label: '旅行', icon: 'Plane', emoji: '✈️' },
   { id: 'food', label: '美食', icon: 'UtensilsCrossed', emoji: '🍽️' },
-  { id: 'activity', label: '活动', icon: 'Gamepad2', emoji: '🎮' },
-  { id: 'photo', label: '照片', icon: 'Camera', emoji: '📷' },
+  { id: 'anniversary', label: '纪念日', icon: 'Heart', emoji: '💕' },
+  { id: 'custom', label: '其他', icon: 'Star', emoji: '⭐' },
 ]
 
 // Media layout types based on count
