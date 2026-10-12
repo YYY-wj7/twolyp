@@ -97,7 +97,6 @@ export async function uploadImages(files, gardenId, recordId) {
       compressed_url: uploaded.url,
       thumbnail_url: uploaded.url,
       sort_order: i,
-      storage_path: uploaded.path,
     })
   }
 
