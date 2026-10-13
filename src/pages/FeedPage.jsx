@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Search, RefreshCw, AlertCircle, Plus, Heart } from 'lucide-react'
+import { Search, RefreshCw, AlertCircle, Plus, Heart, Calendar } from 'lucide-react'
 import { cn, formatRelativeTime, withTimeout } from '../lib/utils'
 import { CATEGORIES } from '../lib/constants'
 import { useAuth } from '../contexts/AppContext'
@@ -386,6 +386,28 @@ export default function FeedPage() {
 
       {/* Period reminder banner */}
       <PeriodReminderBanner />
+
+      {/* Period tracker quick access */}
+      <div className="px-4 mb-1">
+        <button
+          onClick={() => navigate('/period-tracker')}
+          className={cn(
+            'w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all active:scale-[0.98]',
+            'bg-white/70 dark:bg-dark-card/70 backdrop-blur-sm',
+            'border border-milk-100/60 dark:border-dark-border/60',
+            'shadow-sm hover:shadow-md'
+          )}
+        >
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-tulip-100 to-apricot-100 dark:from-tulip-900/30 dark:to-apricot-900/30 flex items-center justify-center shrink-0">
+            <Calendar className="w-4.5 h-4.5 text-tulip-500 dark:text-tulip-400" />
+          </div>
+          <div className="flex-1 text-left">
+            <p className="text-sm font-medium text-milk-800 dark:text-milk-200">经期记录</p>
+            <p className="text-[11px] text-milk-500 dark:text-milk-400">周期追踪 · 症状记录 · 智能提醒</p>
+          </div>
+          <span className="text-milk-400 dark:text-milk-500 text-xs">→</span>
+        </button>
+      </div>
 
       {/* Garden banner */}
       {garden && (

@@ -66,47 +66,51 @@ export default function RecommendationCard({ item, type, onOpenDetail }) {
       </div>
 
       {/* Body */}
-      <div className="px-3 py-2.5">
-        <p className="text-xs text-milk-700 dark:text-milk-300 leading-relaxed line-clamp-2">
+      <div className="px-3 py-3">
+        <p className="text-[11px] text-milk-700 dark:text-milk-300 leading-relaxed line-clamp-2">
           {item.description}
         </p>
 
         {/* Tags / metadata */}
-        <div className="flex flex-wrap gap-1 mt-2">
+        <div className="flex flex-wrap gap-1 mt-2.5">
           {item.bestSeason && (
             <span className={cn(
-              'text-[9px] px-1.5 py-0.5 rounded-full font-medium',
+              'text-[9px] px-2 py-0.5 rounded-full font-medium',
               config.bgAccent, config.textAccent
             )}>
               {item.bestSeason}
             </span>
           )}
           {item.budget && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-milk-100 dark:bg-dark-surface text-milk-600 dark:text-milk-400">
+            <span className="text-[9px] px-2 py-0.5 rounded-full font-medium bg-milk-100 dark:bg-dark-surface text-milk-600 dark:text-milk-400">
               预算 {item.budget}
             </span>
           )}
           {item.year && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-milk-100 dark:bg-dark-surface text-milk-600 dark:text-milk-400">
+            <span className="text-[9px] px-2 py-0.5 rounded-full font-medium bg-milk-100 dark:bg-dark-surface text-milk-600 dark:text-milk-400">
               {item.year}
             </span>
           )}
           {item.rating && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-apricot-50 dark:bg-apricot-900/20 text-apricot-600 dark:text-apricot-300">
+            <span className="text-[9px] px-2 py-0.5 rounded-full font-medium bg-apricot-50 dark:bg-apricot-900/20 text-apricot-600 dark:text-apricot-300">
               ★ {item.rating}
             </span>
           )}
-          {item.tags?.map(tag => (
-            <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-milk-100 dark:bg-dark-surface text-milk-600 dark:text-milk-400">
+          {item.tags?.slice(0, 2).map(tag => (
+            <span key={tag} className="text-[9px] px-2 py-0.5 rounded-full font-medium bg-milk-100 dark:bg-dark-surface text-milk-600 dark:text-milk-400">
               {tag}
             </span>
           ))}
         </div>
 
-        {/* Tap hint */}
-        <p className="text-[9px] text-milk-400 dark:text-milk-500 mt-1.5 text-right">
-          点击查看攻略 →
-        </p>
+        {/* CTA */}
+        <div className={cn(
+          'mt-2.5 flex items-center justify-center gap-1 py-1.5 rounded-lg',
+          'bg-gradient-to-r', config.gradient, 'bg-opacity-10',
+        )}>
+          <span className="text-[10px] font-semibold text-white/90">查看完整攻略</span>
+          <ChevronRight className="w-3 h-3 text-white/90" />
+        </div>
       </div>
     </button>
   )
@@ -174,21 +178,25 @@ export function RecDetailSheet({ item, type, onClose }) {
           <div className="px-5 pb-6 space-y-4">
             {/* Best for */}
             {item.bestFor && (
-              <div className={cn('p-3.5 rounded-xl', config.bgAccent)}>
-                <p className="text-xs text-milk-600 dark:text-milk-400 font-medium mb-1">适合谁去</p>
-                <p className="text-sm text-milk-800 dark:text-milk-200">{item.bestFor}</p>
+              <div className={cn('p-4 rounded-xl', config.bgAccent)}>
+                <p className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
+                  <span>👫</span> <span className="text-milk-600 dark:text-milk-400">适合谁去</span>
+                </p>
+                <p className="text-sm text-milk-800 dark:text-milk-200 leading-relaxed">{item.bestFor}</p>
               </div>
             )}
 
             {/* Must do */}
             {item.mustDo && item.mustDo.length > 0 && (
               <div>
-                <p className="text-xs text-milk-500 dark:text-milk-400 font-semibold mb-2 tracking-wide">必做清单</p>
-                <div className="space-y-1.5">
+                <p className="text-xs font-semibold mb-2.5 flex items-center gap-1.5 text-milk-600 dark:text-milk-400">
+                  <span>✅</span> 必做清单
+                </p>
+                <div className="space-y-2">
                   {item.mustDo.map((task, i) => (
-                    <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-milk-50 dark:bg-dark-surface/50">
-                      <span className="w-5 h-5 rounded-full bg-gradient-to-br from-apricot-300 to-tulip-300 flex items-center justify-center text-white text-[10px] font-bold shrink-0">{i + 1}</span>
-                      <span className="text-sm text-milk-700 dark:text-milk-300">{task}</span>
+                    <div key={i} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-milk-50 dark:bg-dark-surface/50 border border-milk-100/50 dark:border-dark-border/50">
+                      <span className="w-6 h-6 rounded-full bg-gradient-to-br from-apricot-400 to-tulip-400 flex items-center justify-center text-white text-[10px] font-bold shrink-0 shadow-sm">{i + 1}</span>
+                      <span className="text-sm text-milk-800 dark:text-milk-200 font-medium">{task}</span>
                     </div>
                   ))}
                 </div>
@@ -197,16 +205,20 @@ export function RecDetailSheet({ item, type, onClose }) {
 
             {/* Food recommendation */}
             {item.foodRec && (
-              <div className="p-3.5 rounded-xl bg-peach-50 dark:bg-peach-900/20">
-                <p className="text-xs text-milk-500 dark:text-milk-400 font-medium mb-1">美食推荐</p>
-                <p className="text-sm text-milk-800 dark:text-milk-200">{item.foodRec}</p>
+              <div className="p-4 rounded-xl bg-peach-50 dark:bg-peach-900/20 border border-peach-100/50 dark:border-peach-800/20">
+                <p className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
+                  <span>🍜</span> <span className="text-milk-600 dark:text-milk-400">美食推荐</span>
+                </p>
+                <p className="text-sm text-milk-800 dark:text-milk-200 leading-relaxed">{item.foodRec}</p>
               </div>
             )}
 
             {/* Tips */}
             {item.tips && (
-              <div className="p-3.5 rounded-xl bg-milk-50 dark:bg-dark-surface/50">
-                <p className="text-xs text-milk-500 dark:text-milk-400 font-medium mb-1">小贴士</p>
+              <div className="p-4 rounded-xl bg-milk-50 dark:bg-dark-surface/50 border border-milk-100/50 dark:border-dark-border/50">
+                <p className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
+                  <span>💡</span> <span className="text-milk-600 dark:text-milk-400">小贴士</span>
+                </p>
                 <p className="text-sm text-milk-700 dark:text-milk-300 leading-relaxed">{item.tips}</p>
               </div>
             )}
@@ -219,7 +231,9 @@ export function RecDetailSheet({ item, type, onClose }) {
             {/* How to */}
             {item.howTo && (
               <div>
-                <p className="text-xs text-milk-500 dark:text-milk-400 font-semibold mb-2 tracking-wide">怎么做</p>
+                <p className="text-xs font-semibold mb-2 flex items-center gap-1.5 text-milk-600 dark:text-milk-400">
+                  <span>📋</span> 怎么做
+                </p>
                 <p className="text-sm text-milk-700 dark:text-milk-300 leading-relaxed">{item.howTo}</p>
               </div>
             )}
@@ -227,10 +241,12 @@ export function RecDetailSheet({ item, type, onClose }) {
             {/* Preparation */}
             {item.prepare && item.prepare.length > 0 && (
               <div>
-                <p className="text-xs text-milk-500 dark:text-milk-400 font-semibold mb-2 tracking-wide">需要准备</p>
+                <p className="text-xs font-semibold mb-2.5 flex items-center gap-1.5 text-milk-600 dark:text-milk-400">
+                  <span>🎒</span> 需要准备
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {item.prepare.map((p, i) => (
-                    <span key={i} className="text-xs px-3 py-1.5 rounded-full bg-sage-50 dark:bg-sage-900/20 text-sage-600 dark:text-sage-400 font-medium">
+                    <span key={i} className="text-xs px-3 py-1.5 rounded-full bg-sage-50 dark:bg-sage-900/20 text-sage-600 dark:text-sage-400 font-medium border border-sage-100/50 dark:border-sage-800/30">
                       {p}
                     </span>
                   ))}
@@ -240,9 +256,11 @@ export function RecDetailSheet({ item, type, onClose }) {
 
             {/* Photo tip */}
             {item.photoTip && (
-              <div className="p-3.5 rounded-xl bg-apricot-50 dark:bg-apricot-900/20">
-                <p className="text-xs text-milk-500 dark:text-milk-400 font-medium mb-1">拍照建议</p>
-                <p className="text-sm text-milk-800 dark:text-milk-200">{item.photoTip}</p>
+              <div className="p-4 rounded-xl bg-apricot-50 dark:bg-apricot-900/20 border border-apricot-100/50 dark:border-apricot-800/20">
+                <p className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
+                  <span>📸</span> <span className="text-milk-600 dark:text-milk-400">拍照建议</span>
+                </p>
+                <p className="text-sm text-milk-800 dark:text-milk-200 leading-relaxed">{item.photoTip}</p>
               </div>
             )}
           </div>
@@ -254,24 +272,30 @@ export function RecDetailSheet({ item, type, onClose }) {
             {/* Why watch */}
             {item.whyWatch && (
               <div>
-                <p className="text-xs text-milk-500 dark:text-milk-400 font-semibold mb-2 tracking-wide">为什么推荐</p>
+                <p className="text-xs font-semibold mb-2 flex items-center gap-1.5 text-milk-600 dark:text-milk-400">
+                  <span>💕</span> 为什么推荐一起看
+                </p>
                 <p className="text-sm text-milk-700 dark:text-milk-300 leading-relaxed">{item.whyWatch}</p>
               </div>
             )}
 
             {/* Snack pairing */}
             {item.snackRec && (
-              <div className="p-3.5 rounded-xl bg-peach-50 dark:bg-peach-900/20">
-                <p className="text-xs text-milk-500 dark:text-milk-400 font-medium mb-1">搭配零食</p>
-                <p className="text-sm text-milk-800 dark:text-milk-200">{item.snackRec}</p>
+              <div className="p-4 rounded-xl bg-peach-50 dark:bg-peach-900/20 border border-peach-100/50 dark:border-peach-800/20">
+                <p className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
+                  <span>🍿</span> <span className="text-milk-600 dark:text-milk-400">搭配零食</span>
+                </p>
+                <p className="text-sm text-milk-800 dark:text-milk-200 leading-relaxed">{item.snackRec}</p>
               </div>
             )}
 
             {/* Similar recommendations */}
             {item.similarRec && (
-              <div className="p-3.5 rounded-xl bg-milk-50 dark:bg-dark-surface/50">
-                <p className="text-xs text-milk-500 dark:text-milk-400 font-medium mb-1">喜欢还可以看</p>
-                <p className="text-sm text-milk-700 dark:text-milk-300">{item.similarRec}</p>
+              <div className="p-4 rounded-xl bg-milk-50 dark:bg-dark-surface/50 border border-milk-100/50 dark:border-dark-border/50">
+                <p className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
+                  <span>🎬</span> <span className="text-milk-600 dark:text-milk-400">喜欢还可以看</span>
+                </p>
+                <p className="text-sm text-milk-700 dark:text-milk-300 leading-relaxed">{item.similarRec}</p>
               </div>
             )}
           </div>
