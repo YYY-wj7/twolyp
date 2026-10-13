@@ -20,6 +20,7 @@ import JourneyPage from './pages/JourneyPage'
 import AnnualReportPage from './pages/AnnualReportPage'
 import RecycleBinPage from './pages/RecycleBinPage'
 import TravelWishlistPage from './pages/TravelWishlistPage'
+import PeriodTrackerPage from './pages/PeriodTrackerPage'
 
 /**
  * Protected route wrapper — redirects to login if not authenticated
@@ -115,6 +116,9 @@ export default function App() {
             {/* Full-screen routes (no bottom nav) */}
             <Route path="/create" element={
               <ProtectedRoute><CreatePage /></ProtectedRoute>
+            } />
+            <Route path="/period-tracker" element={
+              <ProtectedRoute><PeriodTrackerPage /></ProtectedRoute>
             } />
             <Route path="/record/:id" element={
               <ProtectedRoute><RecordDetailPage /></ProtectedRoute>

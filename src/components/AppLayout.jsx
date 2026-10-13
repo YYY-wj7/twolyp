@@ -15,6 +15,10 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-dvh flex flex-col bg-milk-50 dark:bg-dark-bg transition-theme">
+      {/* Floating tulip decorations */}
+      <div className="tulip-float-deco top-right">🌷</div>
+      <div className="tulip-float-deco bottom-left">🌷</div>
+
       {/* Main content area */}
       <main className="flex-1 relative z-10 pb-20 overflow-y-auto">
         <Outlet />

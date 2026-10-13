@@ -136,16 +136,17 @@ export default function TravelWishlistPage() {
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition">
             <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-200" />
           </button>
-          <Plane className="w-5 h-5 text-coral-400" />
+          <Plane className="w-5 h-5 text-apricot-400" />
           <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">旅行心愿单</h1>
         </div>
       </header>
 
       <div className="px-4 pt-4 pb-24 space-y-4">
         {/* Summary card */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-coral-400 to-coral-500 p-4 text-white shadow-card">
-          <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-white/10" />
-          <div className="absolute right-8 bottom-2 w-12 h-12 rounded-full bg-white/10" />
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-apricot-400 to-tulip-500 p-5 text-white shadow-lg shadow-apricot-400/20">
+          <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-white/10" />
+          <div className="absolute right-10 bottom-1 w-14 h-14 rounded-full bg-white/10" />
+          <div className="absolute -left-4 -bottom-4 w-20 h-20 rounded-full bg-white/5" />
           <div className="relative flex items-center justify-between">
             <div>
               <p className="text-sm text-white/80">我们的旅行计划</p>
@@ -183,7 +184,7 @@ export default function TravelWishlistPage() {
         ) : (
           /* Grid of destination cards */
           <div className="grid grid-cols-2 gap-3">
-            {items.map(item => {
+            {items.map((item, index) => {
               const meta = parseContent(item)
               const visited = item.is_pinned
               return (
@@ -191,39 +192,56 @@ export default function TravelWishlistPage() {
                   key={item.id}
                   onClick={() => toggleStatus(item)}
                   className={cn(
-                    'relative shadow-card rounded-2xl bg-white dark:bg-dark-card p-4 text-left transition-all active:scale-[0.97] cursor-pointer',
-                    visited && 'ring-2 ring-green-300/50'
+                    'relative rounded-2xl bg-white dark:bg-dark-card text-left transition-all active:scale-[0.97] cursor-pointer overflow-hidden',
+                    'border border-milk-100/80 dark:border-dark-border/80',
+                    'shadow-sm hover:shadow-md',
+                    visited && 'ring-2 ring-sage-300/50 dark:ring-sage-600/30'
                   )}
+                  style={{ animationDelay: `${index * 0.03}s` }}
                 >
+                  {/* Gradient accent top */}
+                  <div className={cn(
+                    'h-0.5',
+                    visited
+                      ? 'bg-gradient-to-r from-sage-300 to-sage-400'
+                      : 'bg-gradient-to-r from-apricot-300 to-tulip-400'
+                  )} />
+
                   {/* Delete button */}
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete(item) }}
-                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/10 opacity-40 hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-all"
+                    className="absolute top-3 right-2.5 w-6 h-6 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/10 opacity-40 hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-all z-10"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
-                  <div className="text-3xl mb-2">{meta.emoji || '📍'}</div>
-                  <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm pr-6 truncate">{item.title}</h3>
-                  {meta.subtitle && (
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">{meta.subtitle}</p>
-                  )}
-                  <div className="flex items-center gap-1.5 mt-2">
-                    {meta.bestSeason && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">
-                        {meta.bestSeason}
-                      </span>
+
+                  <div className="p-3.5 pt-3">
+                    {/* Emoji with backdrop circle */}
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-apricot-50 to-tulip-50 dark:from-apricot-900/20 dark:to-tulip-900/20 flex items-center justify-center mb-2">
+                      <span className="text-2xl">{meta.emoji || '📍'}</span>
+                    </div>
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm pr-5 truncate leading-snug">{item.title}</h3>
+                    {meta.subtitle && (
+                      <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5 truncate leading-relaxed">{meta.subtitle}</p>
                     )}
-                  </div>
-                  <div className="mt-2.5">
-                    <span className={cn(
-                      'inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-medium',
-                      visited
-                        ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                        : 'bg-pink-50 dark:bg-pink-900/30 text-apricot-500 dark:text-apricot-400'
-                    )}>
-                      {visited && <Check className="w-3 h-3" />}
-                      {visited ? '已去' : '想去'}
-                    </span>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      {meta.bestSeason && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 font-medium">
+                          {meta.bestSeason}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-2.5">
+                      <span className={cn(
+                        'inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-medium',
+                        visited
+                          ? 'bg-sage-50 dark:bg-sage-900/30 text-sage-600 dark:text-sage-400'
+                          : 'bg-apricot-50 dark:bg-apricot-900/30 text-apricot-500 dark:text-apricot-400'
+                      )}>
+                        {visited && <Check className="w-3 h-3" />}
+                        {visited ? '已去' : '想去'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )
@@ -235,7 +253,7 @@ export default function TravelWishlistPage() {
       {/* Floating add button */}
       <button
         onClick={() => setShowAddModal(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-coral-400 to-coral-500 text-white shadow-lg shadow-coral-400/30 flex items-center justify-center active:scale-95 transition-transform z-20"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-apricot-400 to-tulip-500 text-white shadow-lg shadow-apricot-400/30 flex items-center justify-center active:scale-95 transition-transform z-20"
       >
         <Plus className="w-6 h-6" />
       </button>
@@ -337,7 +355,7 @@ export default function TravelWishlistPage() {
                 disabled={!formData.title.trim() || saving}
                 className={cn(
                   'w-full py-3 rounded-xl font-semibold text-white text-sm transition-all',
-                  'bg-gradient-to-r from-coral-400 to-coral-500 hover:shadow-lg hover:shadow-coral-400/25 active:scale-[0.98]',
+                  'bg-gradient-to-r from-apricot-400 to-tulip-500 hover:shadow-lg hover:shadow-apricot-400/25 active:scale-[0.98]',
                   (!formData.title.trim() || saving) && 'opacity-50 cursor-not-allowed'
                 )}
               >

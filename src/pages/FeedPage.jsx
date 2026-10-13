@@ -6,7 +6,8 @@ import { CATEGORIES } from '../lib/constants'
 import { useAuth } from '../contexts/AppContext'
 import { supabase } from '../lib/supabase'
 import MoodPicker from '../components/MoodPicker'
-import RecommendationCard from '../components/RecommendationCard'
+import RecommendationCard, { RecDetailSheet } from '../components/RecommendationCard'
+import PeriodReminderBanner from '../components/PeriodReminderBanner'
 import { getTodayRecommendation } from '../lib/recommendations'
 
 const STAGGER_CAP = 15
@@ -127,6 +128,7 @@ export default function FeedPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [partnerName, setPartnerName] = useState(null)
   const [daysCount, setDaysCount] = useState(0)
+  const [recDetail, setRecDetail] = useState(null) // { item, type } for detail sheet
   const prevPathnameRef = useRef(location.pathname)
 
   /* Fetch partner info and days count */
@@ -382,6 +384,9 @@ export default function FeedPage() {
         <span className="text-[10px]">🌷</span>
       </div>
 
+      {/* Period reminder banner */}
+      <PeriodReminderBanner />
+
       {/* Garden banner */}
       {garden && (
         <GardenBanner
@@ -440,7 +445,7 @@ export default function FeedPage() {
                 const rec = todayRecCards[recIdx]
                 items.push(
                   <div key={`rec-${rec.type}`} className="card-item animate-fade-in" style={{ animationDelay: `${i * 0.04}s` }}>
-                    <RecommendationCard item={rec.item} type={rec.type} />
+                    <RecommendationCard item={rec.item} type={rec.type} onOpenDetail={setRecDetail} />
                   </div>
                 )
                 recIdx++
@@ -535,6 +540,15 @@ export default function FeedPage() {
             试试其他分类或关键词
           </p>
         </div>
+      )}
+
+      {/* Recommendation detail bottom sheet */}
+      {recDetail && (
+        <RecDetailSheet
+          item={recDetail.item}
+          type={recDetail.type}
+          onClose={() => setRecDetail(null)}
+        />
       )}
     </div>
   )

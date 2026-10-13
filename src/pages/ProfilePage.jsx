@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { cn, daysTogether, withTimeout } from '../lib/utils'
 
 const MENU_ITEMS = [
+  { icon: Heart, label: '经期记录', desc: '周期追踪与提醒', to: '/period-tracker', color: 'text-tulip-400' },
   { icon: Camera, label: '年度报告', desc: '回顾这一年的故事', to: '/annual-report', color: 'text-peach-400' },
   { icon: Trash2, label: '回收站', desc: '31天内可恢复', to: '/recycle-bin', color: 'text-milk-500' },
   { icon: Settings, label: '设置', desc: '账号、隐私、通知', to: '/settings', color: 'text-apricot-400' },
