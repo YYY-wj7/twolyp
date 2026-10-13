@@ -486,21 +486,28 @@ export default function PeriodTrackerPage() {
         )}
 
         {/* Prediction banner */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-apricot-400 to-coral-500 p-5 text-white shadow-card">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-coral-400 to-coral-500 p-5 text-white shadow-lg shadow-coral-400/20">
           <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-white/10" />
           <div className="absolute right-10 bottom-0 w-14 h-14 rounded-full bg-white/10" />
+          <div className="absolute left-3 bottom-3 w-8 h-8 rounded-full bg-white/5" />
           <div className="relative">
             {prediction ? (
               <>
                 <p className="text-sm text-white/80 font-medium">{'\u4e0b\u6b21\u7ecf\u671f\u9884\u6d4b'}</p>
                 <p className="mt-1.5 text-2xl font-bold">{fmtDateCN(prediction.nextStart)}</p>
-                <div className="mt-2 flex items-center gap-3">
+                <div className="mt-3 flex items-center gap-3">
                   {prediction.countdown > 0 ? (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 text-sm font-medium">{'\u8fd8\u6709'} {prediction.countdown} {'\u5929'}</span>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-sm font-medium">
+                      <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                      {'\u8fd8\u6709'} {prediction.countdown} {'\u5929'}
+                    </span>
                   ) : prediction.countdown === 0 ? (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/25 text-sm font-semibold">{'\u9884\u8ba1\u4eca\u5929'}</span>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/25 backdrop-blur-sm text-sm font-semibold">
+                      <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                      {'\u9884\u8ba1\u4eca\u5929'}
+                    </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 text-sm font-medium">{'\u5df2\u8fc7'} {Math.abs(prediction.countdown)} {'\u5929'}</span>
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-sm font-medium">{'\u5df2\u8fc7'} {Math.abs(prediction.countdown)} {'\u5929'}</span>
                   )}
                   <span className="text-xs text-white/70">{'\u5e73\u5747\u5468\u671f'} {prediction.cycleLength} {'\u5929'}</span>
                 </div>
@@ -592,10 +599,10 @@ export default function PeriodTrackerPage() {
             <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 text-coral-400 animate-spin" /></div>
           ) : sortedCycles.length === 0 ? (
             <div className="flex flex-col items-center py-16 space-y-3">
-              <div className="w-16 h-16 rounded-full bg-coral-50 dark:bg-coral-900/20 flex items-center justify-center">
-                <Calendar className="w-7 h-7 text-coral-300 dark:text-coral-600" />
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 flex items-center justify-center shadow-sm">
+                <Pe className="w-12 h-12" />
               </div>
-              <p className="text-sm text-milk-400 dark:text-milk-500">{'\u8fd8\u6ca1\u6709\u7ecf\u671f\u8bb0\u5f55'}</p>
+              <p className="text-sm font-medium text-milk-500 dark:text-milk-400">{'\u8fd8\u6ca1\u6709\u7ecf\u671f\u8bb0\u5f55'}</p>
               <p className="text-xs text-milk-400/70 dark:text-milk-500/70">{'\u70b9\u51fb\u4e0a\u65b9\u6309\u94ae\u5f00\u59cb\u8bb0\u5f55'}</p>
             </div>
           ) : (

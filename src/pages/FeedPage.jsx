@@ -391,21 +391,19 @@ export default function FeedPage() {
       <div className="px-4 mb-1">
         <button
           onClick={() => navigate('/period-tracker')}
-          className={cn(
-            'w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all active:scale-[0.98]',
-            'bg-white/70 dark:bg-dark-card/70 backdrop-blur-sm',
-            'border border-milk-100/60 dark:border-dark-border/60',
-            'shadow-sm hover:shadow-md'
-          )}
+          className="w-full overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-[0.98] group"
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-tulip-100 to-apricot-100 dark:from-tulip-900/30 dark:to-apricot-900/30 flex items-center justify-center shrink-0">
-            <Calendar className="w-4.5 h-4.5 text-tulip-500 dark:text-tulip-400" />
+          <div className="h-[3px] bg-gradient-to-r from-coral-300 via-coral-400 to-tulip-400" />
+          <div className="flex items-center gap-3 px-4 py-3.5 bg-white/70 dark:bg-dark-card/70 backdrop-blur-sm border-x border-b border-milk-100/60 dark:border-dark-border/60 rounded-b-2xl">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-coral-100 to-tulip-100 dark:from-coral-900/30 dark:to-tulip-900/30 flex items-center justify-center shrink-0 shadow-sm">
+              <Calendar className="w-5 h-5 text-coral-500 dark:text-coral-400" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-semibold text-milk-800 dark:text-milk-200">经期记录</p>
+              <p className="text-[11px] text-milk-500 dark:text-milk-400">周期追踪 · 症状记录 · 智能提醒</p>
+            </div>
+            <span className="text-coral-400 dark:text-coral-500 text-sm font-medium group-hover:translate-x-0.5 transition-transform">→</span>
           </div>
-          <div className="flex-1 text-left">
-            <p className="text-sm font-medium text-milk-800 dark:text-milk-200">经期记录</p>
-            <p className="text-[11px] text-milk-500 dark:text-milk-400">周期追踪 · 症状记录 · 智能提醒</p>
-          </div>
-          <span className="text-milk-400 dark:text-milk-500 text-xs">→</span>
         </button>
       </div>
 
