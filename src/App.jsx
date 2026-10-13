@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './contexts/AppContext'
+import { useEffect } from 'react'
+import { AuthProvider, useAuth, db } from './contexts/AppContext'
 import { DBProvider } from './contexts/AppContext'
 
 // Layouts
@@ -66,6 +67,23 @@ function SmartRedirect() {
 }
 
 export default function App() {
+  // Apply saved theme on app startup
+  useEffect(() => {
+    db.appSettings.get('theme-preference').then(entry => {
+      const theme = entry?.value || 'system'
+      const root = document.documentElement
+      if (theme === 'dark') {
+        root.classList.add('dark', 'force-dark')
+      } else if (theme === 'light') {
+        root.classList.add('force-light')
+      } else {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          root.classList.add('dark')
+        }
+      }
+    }).catch(() => {})
+  }, [])
+
   return (
     <HashRouter>
       <AuthProvider>

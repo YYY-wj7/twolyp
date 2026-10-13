@@ -270,9 +270,7 @@ export default function FeedPage() {
     prevPathnameRef.current = currentPathname
   }, [location.pathname, fetchRecords])
 
-  useEffect(() => {
-    fetchRecords()
-  }, [fetchRecords])
+  // fetchRecords is called via the pathname-aware effect above
 
   const filteredRecords = records.filter(r => {
     if (activeCategory !== 'all' && r.category !== activeCategory) return false

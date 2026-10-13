@@ -65,6 +65,8 @@ export default function MapPage() {
   const [cities, setCities] = useState([])
   const [loading, setLoading] = useState(true)
   const [totalTrips, setTotalTrips] = useState(0)
+  const [totalCities, setTotalCities] = useState(0)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     async function fetchTravelData() {
@@ -104,13 +106,15 @@ export default function MapPage() {
         })
 
         // Sort by count descending, take top 20
-        const sorted = Object.values(cityMap)
+        const allSorted = Object.values(cityMap)
           .sort((a, b) => b.count - a.count)
-          .slice(0, 20)
+        setTotalCities(allSorted.length)
+        const sorted = allSorted.slice(0, 20)
 
         setCities(sorted)
       } catch (e) {
         console.warn('Failed to fetch travel data:', e)
+        setError('加载旅行记录失败，请稍后重试')
       } finally {
         setLoading(false)
       }
@@ -143,6 +147,10 @@ export default function MapPage() {
             <div className="w-8 h-8 border-2 border-apricot-300 border-t-apricot-500 rounded-full animate-spin" />
             <span className="text-sm text-milk-500 dark:text-milk-400">加载旅行记录...</span>
           </div>
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center px-8">
+          <p className="text-sm text-red-500">{error}</p>
         </div>
       ) : cities.length === 0 ? (
         /* Empty state — beautiful illustration */
@@ -178,7 +186,7 @@ export default function MapPage() {
               <span className="text-sm font-medium opacity-90">旅行足迹</span>
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-bold">{cities.length}</span>
+              <span className="text-4xl font-bold">{totalCities}</span>
               <span className="text-sm opacity-80">个城市</span>
             </div>
             <p className="text-xs opacity-70 mt-1">

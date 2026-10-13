@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Make dark: variant class-based so JS theme toggle controls ALL dark: utilities */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ============================================
    TwoLyp Theme — Coral Romance / Warm Pink
    ============================================ */
@@ -88,30 +91,14 @@ body {
   overscroll-behavior: none;
 }
 
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: var(--color-dark-bg);
-    color: var(--color-milk-200);
-  }
-}
-
-/* Manual theme overrides (force-dark / force-light via JS class on <html>) */
-html.force-dark body {
+/* Dark mode — now controlled by .dark class on <html> via @custom-variant */
+html.dark body {
   background-color: var(--color-dark-bg);
   color: var(--color-milk-200);
   color-scheme: dark;
 }
-html.force-dark .glass { background: rgba(28, 20, 24, 0.85) !important; }
-html.force-dark .dark\:bg-dark-bg { background-color: var(--color-dark-bg); }
-html.force-dark .dark\:bg-dark-card { background-color: var(--color-dark-card); }
-html.force-dark .dark\:bg-dark-surface { background-color: var(--color-dark-surface); }
-html.force-dark .dark\:bg-dark-border { background-color: var(--color-dark-border); }
-html.force-dark .dark\:text-milk-100 { color: var(--color-milk-100); }
-html.force-dark .dark\:text-milk-200 { color: var(--color-milk-200); }
-html.force-dark .dark\:text-milk-300 { color: var(--color-milk-300); }
-html.force-dark .dark\:text-milk-400 { color: var(--color-milk-400); }
 
+/* Force-light: suppress dark styles when user prefers light but OS is dark */
 html.force-light body {
   background-color: var(--color-milk-50);
   color: var(--color-milk-900);
@@ -131,10 +118,8 @@ html.force-light .glass { background: rgba(255, 250, 250, 0.85) !important; }
   background-size: 120px 120px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .tulip-bg {
-    opacity: 0.04;
-  }
+html.dark .tulip-bg {
+  opacity: 0.04;
 }
 
 /* Safe area padding for notched phones */
@@ -156,10 +141,8 @@ html.force-light .glass { background: rgba(255, 250, 250, 0.85) !important; }
   background: var(--color-milk-400);
   border-radius: 2px;
 }
-@media (prefers-color-scheme: dark) {
-  ::-webkit-scrollbar-thumb {
-    background: var(--color-dark-border);
-  }
+html.dark ::-webkit-scrollbar-thumb {
+  background: var(--color-dark-border);
 }
 
 /* Hide scrollbar utility */
@@ -516,44 +499,42 @@ html.force-light .glass { background: rgba(255, 250, 250, 0.85) !important; }
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .auth-panel {
-    border-color: rgba(66, 52, 59, 0.62);
-    background: rgba(38, 28, 33, 0.92);
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
-  }
+html.dark .auth-panel {
+  border-color: rgba(66, 52, 59, 0.62);
+  background: rgba(38, 28, 33, 0.92);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+}
 
-  .auth-tabs {
-    border-color: var(--color-dark-border);
-    background: rgba(28, 20, 24, 0.74);
-  }
+html.dark .auth-tabs {
+  border-color: var(--color-dark-border);
+  background: rgba(28, 20, 24, 0.74);
+}
 
-  .auth-tab-active,
-  .auth-choice-active {
-    color: var(--color-apricot-200);
-    background: var(--color-dark-card);
-  }
+html.dark .auth-tab-active,
+html.dark .auth-choice-active {
+  color: var(--color-apricot-200);
+  background: var(--color-dark-card);
+}
 
-  .auth-field input {
-    border-color: var(--color-dark-border);
-    background: rgba(48, 36, 42, 0.92);
-    color: var(--color-milk-100);
-  }
+html.dark .auth-field input {
+  border-color: var(--color-dark-border);
+  background: rgba(48, 36, 42, 0.92);
+  color: var(--color-milk-100);
+}
 
-  .auth-field input:focus {
-    border-color: var(--color-apricot-500);
-    background: var(--color-dark-card);
-  }
+html.dark .auth-field input:focus {
+  border-color: var(--color-apricot-500);
+  background: var(--color-dark-card);
+}
 
-  .auth-message-error {
-    color: var(--color-tulip-200);
-    background: rgba(159, 18, 57, 0.25);
-  }
+html.dark .auth-message-error {
+  color: var(--color-tulip-200);
+  background: rgba(159, 18, 57, 0.25);
+}
 
-  .auth-message-success {
-    color: #bbf7d0;
-    background: rgba(22, 163, 74, 0.2);
-  }
+html.dark .auth-message-success {
+  color: #bbf7d0;
+  background: rgba(22, 163, 74, 0.2);
 }
 
 /* ============================================

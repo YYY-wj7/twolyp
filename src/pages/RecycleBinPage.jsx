@@ -4,6 +4,7 @@ import { ArrowLeft, RotateCcw, Trash2, Leaf } from 'lucide-react'
 import { cn, withTimeout } from '../lib/utils'
 import { useAuth } from '../contexts/AppContext'
 import { supabase } from '../lib/supabase'
+import { deleteMediaFiles } from '../lib/storage'
 
 export default function RecycleBinPage() {
   const navigate = useNavigate()
@@ -77,6 +78,47 @@ export default function RecycleBinPage() {
     setActionLoading(id)
     setActionError('')
     try {
+      // 1. Query associated media to clean up storage files
+      const { data: mediaItems } = await withTimeout(
+        supabase
+          .from('media')
+          .select('original_url, compressed_url, thumbnail_url')
+          .eq('record_id', id),
+        15000,
+        '查询媒体文件'
+      )
+
+      // 2. Extract storage paths from URLs and delete from storage
+      if (mediaItems?.length > 0) {
+        const paths = []
+        const marker = '/storage/v1/object/public/media/'
+        for (const m of mediaItems) {
+          for (const url of [m.original_url, m.compressed_url, m.thumbnail_url]) {
+            if (url) {
+              const idx = url.indexOf(marker)
+              if (idx !== -1) {
+                const p = url.slice(idx + marker.length)
+                if (p && !paths.includes(p)) paths.push(p)
+              }
+            }
+          }
+        }
+        if (paths.length > 0) {
+          await deleteMediaFiles(paths)
+        }
+
+        // 3. Delete media rows (also handled by ON DELETE CASCADE, but explicit is safer)
+        await withTimeout(
+          supabase
+            .from('media')
+            .delete()
+            .eq('record_id', id),
+          15000,
+          '删除媒体记录'
+        )
+      }
+
+      // 4. Delete the record
       const { error } = await withTimeout(
         supabase
           .from('records')

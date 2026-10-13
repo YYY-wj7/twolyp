@@ -284,7 +284,7 @@ export default function CreatePage() {
           </div>
 
           {/* Date */}
-          <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-milk-100 dark:bg-dark-card hover:bg-milk-200 dark:hover:bg-dark-border transition-colors w-full">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-milk-100 dark:bg-dark-card hover:bg-milk-200 dark:hover:bg-dark-border transition-colors w-full">
             <Calendar className="w-4 h-4 text-apricot-500" />
             <input
               type="date"
@@ -292,7 +292,7 @@ export default function CreatePage() {
               onChange={(e) => setDate(e.target.value)}
               className="text-sm bg-transparent text-milk-800 dark:text-milk-200 focus:outline-none flex-1"
             />
-          </button>
+          </div>
         </div>
       </div>
 

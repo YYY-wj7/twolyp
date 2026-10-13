@@ -16,13 +16,19 @@ const THEME_OPTIONS = [
 function applyTheme(theme) {
   const root = document.documentElement
   if (theme === 'dark') {
-    root.classList.add('force-dark')
+    root.classList.add('dark', 'force-dark')
     root.classList.remove('force-light')
   } else if (theme === 'light') {
     root.classList.add('force-light')
-    root.classList.remove('force-dark')
+    root.classList.remove('dark', 'force-dark')
   } else {
+    // system: follow OS preference
     root.classList.remove('force-dark', 'force-light')
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      root.classList.add('dark')
+    } else {
+      root.classList.remove('dark')
+    }
   }
 }
 
@@ -65,6 +71,17 @@ export default function SettingsPage() {
       } catch (e) { /* ignore */ }
     }
     loadTheme()
+
+    // Listen for OS dark mode changes (for 'system' theme)
+    const mql = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = () => {
+      // Re-read saved theme in case it changed
+      db.appSettings.get('theme-preference').then(entry => {
+        if ((entry?.value || 'system') === 'system') applyTheme('system')
+      }).catch(() => {})
+    }
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
   }, [])
 
   // Save theme preference
