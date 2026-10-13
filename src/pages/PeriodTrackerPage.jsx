@@ -544,51 +544,62 @@ export default function PeriodTrackerPage() {
         </button>
 
         {/* Calendar */}
-        <div className="rounded-2xl bg-white dark:bg-dark-card shadow-card border border-milk-100 dark:border-dark-border p-4">
-          <div className="flex items-center justify-between mb-4">
-            <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition">
-              <ChevronLeft className="w-5 h-5 text-milk-500 dark:text-milk-400" />
-            </button>
-            <h3 className="text-sm font-semibold text-milk-900 dark:text-milk-100">{fmtMonthCN(viewYear, viewMonth)}</h3>
-            <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition">
-              <ChevronRight className="w-5 h-5 text-milk-500 dark:text-milk-400" />
-            </button>
+        <div className="rounded-2xl bg-gradient-to-b from-white to-coral-50/30 dark:from-dark-card dark:to-dark-card shadow-card border border-coral-100/50 dark:border-dark-border overflow-hidden">
+          <div className="px-4 pt-4 pb-2">
+            <div className="flex items-center justify-between mb-4">
+              <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-coral-100/50 dark:hover:bg-white/10 transition">
+                <ChevronLeft className="w-5 h-5 text-coral-500 dark:text-coral-400" />
+              </button>
+              <h3 className="text-base font-bold text-milk-900 dark:text-milk-100 tracking-wide">{fmtMonthCN(viewYear, viewMonth)}</h3>
+              <button onClick={nextMonth} className="p-2 rounded-xl hover:bg-coral-100/50 dark:hover:bg-white/10 transition">
+                <ChevronRight className="w-5 h-5 text-coral-500 dark:text-coral-400" />
+              </button>
+            </div>
+            <div className="grid grid-cols-7 mb-3">
+              {WEEKDAYS.map((w, i) => (
+                <div key={w} className={cn(
+                  'text-center text-[11px] font-semibold py-1.5 rounded-md',
+                  (i === 0 || i === 6) ? 'text-coral-400 dark:text-coral-500' : 'text-milk-400 dark:text-milk-500'
+                )}>{w}</div>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-7 mb-2">
-            {WEEKDAYS.map(w => (
-              <div key={w} className="text-center text-[11px] font-medium text-milk-400 dark:text-milk-500 py-1">{w}</div>
-            ))}
+          <div className="px-2 pb-3">
+            <div className="grid grid-cols-7 gap-y-0.5">
+              {calendarGrid.map((cell, i) => {
+                if (!cell) return <div key={`e-${i}`} />
+                const isPeriod = periodDays.has(cell.dateStr)
+                const isPredicted = predictedDays.has(cell.dateStr)
+                const isToday = cell.dateStr === toISO(new Date())
+                return (
+                  <div key={cell.dateStr} className="flex items-center justify-center py-0.5">
+                    <div className={cn(
+                      'w-10 h-10 rounded-full flex items-center justify-center text-sm transition-all',
+                      isPeriod && 'bg-gradient-to-br from-coral-400 to-coral-500 text-white font-bold shadow-md shadow-coral-400/25 dark:shadow-coral-800/40',
+                      isPredicted && !isPeriod && 'bg-coral-50 dark:bg-coral-900/20 border-2 border-dashed border-coral-300 dark:border-coral-600 text-coral-500 dark:text-coral-400 font-medium',
+                      !isPeriod && !isPredicted && 'text-milk-700 dark:text-milk-300 hover:bg-coral-50 dark:hover:bg-white/5',
+                      isToday && !isPeriod && !isPredicted && 'ring-2 ring-coral-400 dark:ring-coral-500 font-bold text-coral-500 dark:text-coral-400',
+                    )}>{cell.day}</div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
-          <div className="grid grid-cols-7 gap-y-1">
-            {calendarGrid.map((cell, i) => {
-              if (!cell) return <div key={`e-${i}`} />
-              const isPeriod = periodDays.has(cell.dateStr)
-              const isPredicted = predictedDays.has(cell.dateStr)
-              const isToday = cell.dateStr === toISO(new Date())
-              return (
-                <div key={cell.dateStr} className="flex items-center justify-center py-1">
-                  <div className={cn(
-                    'w-9 h-9 rounded-full flex items-center justify-center text-xs transition-all',
-                    isPeriod && 'bg-gradient-to-br from-coral-400 to-coral-500 text-white font-semibold shadow-sm shadow-coral-300/30 dark:shadow-coral-800/30',
-                    isPredicted && !isPeriod && 'border-2 border-dashed border-coral-300 dark:border-coral-600 text-coral-400 dark:text-coral-500 font-medium',
-                    !isPeriod && !isPredicted && 'text-milk-700 dark:text-milk-300',
-                    isToday && !isPeriod && 'ring-2 ring-apricot-300 dark:ring-apricot-600 font-semibold',
-                  )}>{cell.day}</div>
-                </div>
-              )
-            })}
-          </div>
-          <div className="flex items-center gap-4 mt-4 pt-3 border-t border-milk-100 dark:border-dark-border">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-gradient-to-br from-coral-400 to-coral-500" />
-              <span className="text-[11px] text-milk-500 dark:text-milk-400">{'\u7ecf\u671f'}</span>
+          <div className="flex items-center gap-5 px-4 py-3 bg-coral-50/50 dark:bg-white/5 border-t border-coral-100/50 dark:border-dark-border">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-gradient-to-br from-coral-400 to-coral-500 shadow-sm shadow-coral-400/30" />
+              <span className="text-[11px] text-milk-600 dark:text-milk-400 font-medium">{'\u7ecf\u671f'}</span>
             </div>
             {prediction && (
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full border-2 border-dashed border-coral-300 dark:border-coral-600" />
-                <span className="text-[11px] text-milk-500 dark:text-milk-400">{'\u9884\u6d4b'}</span>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-coral-50 dark:bg-coral-900/20 border-2 border-dashed border-coral-300 dark:border-coral-600" />
+                <span className="text-[11px] text-milk-600 dark:text-milk-400 font-medium">{'\u9884\u6d4b'}</span>
               </div>
             )}
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full ring-2 ring-coral-400 dark:ring-coral-500" />
+              <span className="text-[11px] text-milk-600 dark:text-milk-400 font-medium">{'\u4eca\u5929'}</span>
+            </div>
           </div>
         </div>
 
@@ -691,9 +702,9 @@ export default function PeriodTrackerPage() {
 
       {/* Bottom sheet modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={closeModal} />
-          <div className="relative w-full max-w-lg bg-white dark:bg-dark-card rounded-t-3xl p-6 pb-8 animate-slide-up max-h-[90dvh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeModal} />
+          <div className="relative w-full max-w-lg bg-white dark:bg-dark-card rounded-3xl p-6 pb-8 animate-slide-up max-h-[85dvh] overflow-y-auto shadow-2xl">
             <div className="flex justify-center mb-4"><div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-white/20" /></div>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-semibold text-milk-900 dark:text-milk-100">
