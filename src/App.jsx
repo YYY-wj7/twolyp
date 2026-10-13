@@ -1,7 +1,8 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { AuthProvider, useAuth, db } from './contexts/AppContext'
 import { DBProvider } from './contexts/AppContext'
+import SplashScreen from './components/SplashScreen'
 
 // Layouts
 import AppLayout from './components/AppLayout'
@@ -30,10 +31,14 @@ function ProtectedRoute({ children }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-milk-50 dark:bg-dark-bg">
-        <div className="animate-pulse flex flex-col items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-apricot-200 dark:bg-apricot-800" />
-          <p className="text-sm text-milk-600 dark:text-milk-400">加载中...</p>
+      <div className="min-h-dvh flex items-center justify-center bg-gradient-to-b from-milk-50 to-apricot-50 dark:from-dark-bg dark:to-dark-card">
+        <div className="flex flex-col items-center gap-3 animate-fade-in">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-coral-400 to-apricot-500 flex items-center justify-center shadow-lg shadow-coral-400/20 animate-pulse">
+            <svg viewBox="0 0 96 96" className="w-8 h-8" fill="none">
+              <path d="M48 19c-5.8 0-11 5.7-13.2 13.7C28.9 26.4 22 25.1 17 28.8c.6 22.8 10.8 36.4 31 40.7 20.2-4.3 30.4-17.9 31-40.7-5-3.7-11.9-2.4-17.8 3.9C59 24.7 53.8 19 48 19Z" fill="white" />
+            </svg>
+          </div>
+          <p className="text-sm text-milk-600 dark:text-milk-400 font-medium">加载中...</p>
         </div>
       </div>
     )
@@ -69,6 +74,9 @@ function SmartRedirect() {
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true)
+  const handleSplashDone = useCallback(() => setShowSplash(false), [])
+
   // Apply saved theme on app startup
   useEffect(() => {
     db.appSettings.get('theme-preference').then(entry => {
@@ -139,6 +147,7 @@ export default function App() {
           </Routes>
         </DBProvider>
       </AuthProvider>
+      {showSplash && <SplashScreen onDone={handleSplashDone} />}
     </HashRouter>
   )
 }
