@@ -44,32 +44,36 @@ const P2 = ({ className = "w-8 h-8" }) => (
 )
 const P3 = ({ className = "w-8 h-8" }) => (
   <svg viewBox="0 0 44 44" className={className} fill="none">
-    <path d="M10 21L7 6L18 17Z" fill="#FDA4AF" /><path d="M34 21L37 6L26 17Z" fill="#FDA4AF" />
+    <path d="M10 21L7 6L18 17Z" fill="#FECDD3" /><path d="M34 21L37 6L26 17Z" fill="#FECDD3" />
     <circle cx="22" cy="26" r="14" fill="#FFF1F2" />
-    <path d="M14 23L20 25" stroke="#9F1239" strokeWidth="1.6" strokeLinecap="round" />
-    <path d="M30 23L24 25" stroke="#9F1239" strokeWidth="1.6" strokeLinecap="round" />
-    <circle cx="17" cy="25.5" r="1.2" fill="#9F1239" /><circle cx="27" cy="25.5" r="1.2" fill="#9F1239" />
-    <ellipse cx="22" cy="29" rx="1.3" ry=".9" fill="#F9A8D4" />
-    <ellipse cx="22" cy="33" rx="2.5" ry="2" fill="#9F1239" opacity=".15" />
-    <path d="M34 14Q36 11 38 14" stroke="#FDA4AF" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-    <path d="M36 10Q38 7 40 10" stroke="#FDA4AF" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity=".6" />
-    <ellipse cx="15" cy="28" rx="3" ry="2" fill="#FECDD3" opacity=".5" />
-    <ellipse cx="29" cy="28" rx="3" ry="2" fill="#FECDD3" opacity=".5" />
+    <ellipse cx="16" cy="23.5" rx="3.5" ry="3.8" fill="white" /><circle cx="16.5" cy="24.5" r="2" fill="#9F1239" /><circle cx="15.5" cy="23" r="1" fill="white" />
+    <ellipse cx="28" cy="23.5" rx="3.5" ry="3.8" fill="white" /><circle cx="28.5" cy="24.5" r="2" fill="#9F1239" /><circle cx="27.5" cy="23" r="1" fill="white" />
+    <ellipse cx="16" cy="26" rx="2" ry="1" fill="#60A5FA" opacity=".3" />
+    <ellipse cx="28" cy="26" rx="2" ry="1" fill="#60A5FA" opacity=".3" />
+    <ellipse cx="22" cy="28.5" rx="1.3" ry=".9" fill="#F9A8D4" />
+    <path d="M19 31Q22 33 25 31" stroke="#9F1239" strokeWidth="1" strokeLinecap="round" fill="none" />
+    <ellipse cx="13" cy="28" rx="3.5" ry="2" fill="#FECDD3" opacity=".5" />
+    <ellipse cx="31" cy="28" rx="3.5" ry="2" fill="#FECDD3" opacity=".5" />
+    <circle cx="35" cy="13" r="1.5" fill="#93C5FD" opacity=".5" />
+    <path d="M35 14.5Q35 17 35.5 18" stroke="#93C5FD" strokeWidth="1" strokeLinecap="round" opacity=".4" />
   </svg>
 )
 const P4 = ({ className = "w-8 h-8" }) => (
   <svg viewBox="0 0 44 44" className={className} fill="none">
-    <path d="M10 21L7 6L18 17Z" fill="#F87171" /><path d="M34 21L37 6L26 17Z" fill="#F87171" />
+    <path d="M10 21L7 6L18 17Z" fill="#FCA5A5" /><path d="M34 21L37 6L26 17Z" fill="#FCA5A5" />
     <circle cx="22" cy="26" r="14" fill="#FEE2E2" />
-    <path d="M14 24L20 26" stroke="#991B1B" strokeWidth="1.8" strokeLinecap="round" />
-    <path d="M30 24L24 26" stroke="#991B1B" strokeWidth="1.8" strokeLinecap="round" />
-    <circle cx="17" cy="26.5" r="1.3" fill="#991B1B" /><circle cx="27" cy="26.5" r="1.3" fill="#991B1B" />
-    <ellipse cx="22" cy="29" rx="1.2" ry=".8" fill="#F9A8D4" />
-    <path d="M18 32Q22 37 26 32" stroke="#991B1B" strokeWidth="1.3" fill="#FCA5A5" opacity=".5" />
-    <path d="M13 27Q12 31 13.5 34" stroke="#60A5FA" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-    <path d="M31 27Q32 31 30.5 34" stroke="#60A5FA" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-    <ellipse cx="15" cy="28" rx="3" ry="2" fill="#FECACA" opacity=".5" />
-    <ellipse cx="29" cy="28" rx="3" ry="2" fill="#FECACA" opacity=".5" />
+    <ellipse cx="16" cy="23" rx="3.8" ry="4" fill="white" /><circle cx="16.5" cy="24" r="2.3" fill="#BE123C" /><circle cx="15.5" cy="22.5" r="1.1" fill="white" />
+    <ellipse cx="28" cy="23" rx="3.8" ry="4" fill="white" /><circle cx="28.5" cy="24" r="2.3" fill="#BE123C" /><circle cx="27.5" cy="22.5" r="1.1" fill="white" />
+    <ellipse cx="16" cy="26.5" rx="3" ry="1.5" fill="#93C5FD" opacity=".3" />
+    <ellipse cx="28" cy="26.5" rx="3" ry="1.5" fill="#93C5FD" opacity=".3" />
+    <ellipse cx="22" cy="28.5" rx="1.2" ry=".8" fill="#F9A8D4" />
+    <ellipse cx="22" cy="33" rx="3" ry="2.2" fill="#BE123C" opacity=".15" stroke="#BE123C" strokeWidth=".8" />
+    <ellipse cx="13" cy="28" rx="3.5" ry="2" fill="#FECACA" opacity=".5" />
+    <ellipse cx="31" cy="28" rx="3.5" ry="2" fill="#FECACA" opacity=".5" />
+    <path d="M12 26Q11 30 12 34" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" opacity=".5" />
+    <circle cx="12" cy="35" r="1.5" fill="#93C5FD" opacity=".4" />
+    <path d="M32 26Q33 30 32 34" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" opacity=".5" />
+    <circle cx="32" cy="35" r="1.5" fill="#93C5FD" opacity=".4" />
   </svg>
 )
 const MN = ({ className = "w-8 h-8" }) => (
