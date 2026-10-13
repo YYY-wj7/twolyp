@@ -19,6 +19,7 @@ import SettingsPage from './pages/SettingsPage'
 import JourneyPage from './pages/JourneyPage'
 import AnnualReportPage from './pages/AnnualReportPage'
 import RecycleBinPage from './pages/RecycleBinPage'
+import TravelWishlistPage from './pages/TravelWishlistPage'
 
 /**
  * Protected route wrapper — redirects to login if not authenticated
@@ -104,6 +105,7 @@ export default function App() {
             }>
               <Route path="/feed" element={<FeedPage />} />
               <Route path="/map" element={<MapPage />} />
+              <Route path="/wishlist" element={<TravelWishlistPage />} />
               <Route path="/anniversary" element={<AnniversaryPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/settings" element={<SettingsPage />} />

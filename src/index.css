@@ -112,10 +112,10 @@ html.force-light .glass { background: rgba(255, 250, 250, 0.85) !important; }
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.055;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23F4728B' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.2'%3E%3Cpath d='M60 28c-8-12-22-8-22 4s14 18 22 22c8-4 22-10 22-22s-14-16-22-4Z'/%3E%3Cpath d='M60 54v30'/%3E%3Cpath d='M60 68c-10-8-18-4-18 3 8 1 14 0 18-3Zm0 12c10-8 18-4 18 3-8 1-14 0-18-3Z'/%3E%3Cpath d='M30 80c-2-4-7-4-7 0s5 5 7 5c2 0 7-1 7-5s-5-4-7 0Z' opacity='.5'/%3E%3Cpath d='M95 35c-2-3-6-3-6 0s4 4 6 4c2 0 6-1 6-4s-4-3-6 0Z' opacity='.5'/%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23F4728B' stroke-linecap='round' stroke-linejoin='round' stroke-width='1'%3E%3C!-- Tulip flower 1 --%3E%3Cpath d='M25 20c-5-8-14-5-14 3s9 12 14 14c5-2 14-7 14-14s-9-11-14-3Z'/%3E%3Cpath d='M25 37v16'/%3E%3Cpath d='M25 44c-6-5-11-3-11 2 5 1 9 0 11-2Zm0 6c6-5 11-3 11 2-5 1-9 0-11-2Z'/%3E%3C!-- Tulip flower 2 --%3E%3Cpath d='M75 60c-4-6-11-4-11 2s7 9 11 11c4-2 11-5 11-11s-7-8-11-2Z'/%3E%3Cpath d='M75 73v14'/%3E%3Cpath d='M75 79c-5-4-9-2-9 1.5 4 .5 7 0 9-1.5Zm0 5c5-4 9-2 9 1.5-4 .5-7 0-9-1.5Z'/%3E%3C!-- Small hearts --%3E%3Cpath d='M55 15c-1.5-2.5-4.5-2-4.5.5s3 3.5 4.5 4c1.5-.5 4.5-1.5 4.5-4s-3-3-4.5-.5Z' opacity='.4'/%3E%3Cpath d='M10 70c-1.5-2.5-4.5-2-4.5.5s3 3.5 4.5 4c1.5-.5 4.5-1.5 4.5-4s-3-3-4.5-.5Z' opacity='.4'/%3E%3C!-- Scattered dots --%3E%3Ccircle cx='45' cy='45' r='1' fill='%23F4728B' opacity='.3'/%3E%3Ccircle cx='90' cy='25' r='1' fill='%23F4728B' opacity='.3'/%3E%3Ccircle cx='5' cy='45' r='1' fill='%23F4728B' opacity='.3'/%3E%3Ccircle cx='50' cy='90' r='1' fill='%23F4728B' opacity='.3'/%3E%3C!-- Small leaf accents --%3E%3Cpath d='M92 85c-1.5-3-5-3-5 0s3.5 3.5 5 3.5 5-.5 5-3.5-3.5-3-5 0Z' opacity='.35'/%3E%3Cpath d='M40 5c-1.5-3-5-3-5 0s3.5 3.5 5 3.5 5-.5 5-3.5-3.5-3-5 0Z' opacity='.35'/%3E%3C/g%3E%3C/svg%3E");
   background-position: center top;
-  background-size: 120px 120px;
+  background-size: 100px 100px;
 }
 
 html.dark .tulip-bg {
@@ -664,4 +664,71 @@ html.dark .glass {
 }
 .animate-scale-in {
   animation: scaleIn 0.4s ease-out forwards;
+}
+
+/* ============================================
+   Tulip Decorations — Scattered across pages
+   ============================================ */
+
+/* Tulip section divider — a small tulip between sections */
+.tulip-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+  opacity: 0.35;
+}
+.tulip-divider::before,
+.tulip-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-apricot-300), transparent);
+}
+
+/* Tulip corner accent for cards/headers */
+.tulip-corner {
+  position: relative;
+}
+.tulip-corner::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 32px;
+  height: 32px;
+  opacity: 0.15;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke='%23F4728B' stroke-linecap='round' stroke-width='1.2'%3E%3Cpath d='M16 4c-3-5-9-3-9 2s6 7 9 8c3-1 9-3 9-8s-6-7-9-2Z'/%3E%3Cpath d='M16 14v12'/%3E%3Cpath d='M16 20c-4-3-7-1-7 1 3 .5 5 0 7-1Zm0 4c4-3 7-1 7 1-3 .5-5 0-7-1Z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: contain;
+  pointer-events: none;
+}
+
+/* Floating tulip animation for empty states */
+.tulip-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Tulip accent line for page headers */
+.tulip-accent-line {
+  width: 40px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--color-apricot-400), var(--color-tulip-400));
+  margin: 0 auto 12px;
+}
+
+/* Subtle tulip watermark for empty/placeholder areas */
+.tulip-watermark {
+  position: relative;
+}
+.tulip-watermark::before {
+  content: '🌷';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  opacity: 0.08;
+  pointer-events: none;
 }

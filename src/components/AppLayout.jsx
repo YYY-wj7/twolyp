@@ -1,12 +1,12 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
-import { Home, Map, Heart, User, Plus } from 'lucide-react'
+import { Home, Map, Heart, User, Plus, Plane } from 'lucide-react'
 import { cn } from '../lib/utils'
 
 const NAV_ITEMS = [
   { to: '/feed', icon: Home, label: '首页' },
   { to: '/map', icon: Map, label: '足迹' },
   { to: '/create', icon: Plus, label: '', isCreate: true },
-  { to: '/anniversary', icon: Heart, label: '纪念日' },
+  { to: '/wishlist', icon: Plane, label: '心愿' },
   { to: '/profile', icon: User, label: '我的' },
 ]
 
@@ -58,7 +58,6 @@ export default function AppLayout() {
                         : 'text-milk-500 dark:text-milk-600'
                     )}
                     strokeWidth={isActive ? 2.2 : 1.8}
-                    fill={isActive && item.to === '/anniversary' ? 'currentColor' : 'none'}
                   />
                   <span className={cn(
                     'text-[10px] leading-tight transition-all duration-200',
