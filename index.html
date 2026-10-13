@@ -10,10 +10,19 @@
     <meta name="apple-mobile-web-app-title" content="TwoLyp" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <title>TwoLyp</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          const base = document.querySelector('base')?.href || '/twolyp/';
+          navigator.serviceWorker.register(base + 'sw.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>

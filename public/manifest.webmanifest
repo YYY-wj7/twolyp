@@ -1,0 +1,16 @@
+{
+  "name": "TwoLyp — Two of us, one garden",
+  "short_name": "TwoLyp",
+  "description": "Our private garden of memories",
+  "theme_color": "#F4728B",
+  "background_color": "#FFFAFA",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/twolyp/",
+  "start_url": "/twolyp/",
+  "icons": [
+    { "src": "/twolyp/pwa-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/twolyp/pwa-512x512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/twolyp/pwa-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
