@@ -1,5 +1,5 @@
 // TwoLyp Service Worker — offline-first PWA
-const CACHE = 'twolyp-v2';
+const CACHE = 'twolyp-v3';
 const SHELL = [
   './',
   './index.html',
