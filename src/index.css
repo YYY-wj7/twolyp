@@ -59,6 +59,18 @@
   --color-peach-300: #FDBA74;
   --color-peach-400: #FB923C;
 
+  /* Coral — warm rose for period tracker */
+  --color-coral-50: #FFF1F3;
+  --color-coral-100: #FFE4E8;
+  --color-coral-200: #FECDD6;
+  --color-coral-300: #FCA5B5;
+  --color-coral-400: #F87191;
+  --color-coral-500: #E8456A;
+  --color-coral-600: #D1305A;
+  --color-coral-700: #B0244C;
+  --color-coral-800: #922040;
+  --color-coral-900: #7A1E38;
+
   /* Dark mode backgrounds */
   --color-dark-bg: #1C1418;
   --color-dark-surface: #261C21;

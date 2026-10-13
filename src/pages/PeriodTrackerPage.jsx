@@ -5,6 +5,142 @@ import { useAuth } from '../contexts/AppContext'
 import { supabase } from '../lib/supabase'
 import { cn, withTimeout } from '../lib/utils'
 
+/* ---- Period cat stickers (different from MoodPicker) ---- */
+const Pe = ({ className = "w-8 h-8" }) => (
+  <svg viewBox="0 0 44 44" className={className} fill="none">
+    <path d="M10 21L7 6L18 17Z" fill="#C4B5FD" /><path d="M34 21L37 6L26 17Z" fill="#C4B5FD" />
+    <circle cx="22" cy="26" r="14" fill="#EDE9FE" />
+    <path d="M15 25Q17.5 23 20 25" stroke="#7C3AED" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+    <path d="M24 25Q26.5 23 29 25" stroke="#7C3AED" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+    <ellipse cx="22" cy="29" rx="1.5" ry="1" fill="#F9A8D4" />
+    <ellipse cx="15" cy="29" rx="3" ry="2" fill="#F5D0FE" opacity=".4" />
+    <ellipse cx="29" cy="29" rx="3" ry="2" fill="#F5D0FE" opacity=".4" />
+    <text x="34" y="10" fontSize="8">z</text><text x="38" y="5" fontSize="6" opacity=".6">z</text>
+  </svg>
+)
+const P1 = ({ className = "w-8 h-8" }) => (
+  <svg viewBox="0 0 44 44" className={className} fill="none">
+    <path d="M10 21L7 6L18 17Z" fill="#6EE7B7" /><path d="M34 21L37 6L26 17Z" fill="#6EE7B7" />
+    <circle cx="22" cy="26" r="14" fill="#ECFDF5" />
+    <circle cx="17" cy="24" r="2.8" fill="white" /><circle cx="17.5" cy="24.5" r="1.6" fill="#065F46" />
+    <circle cx="27" cy="24" r="2.8" fill="white" /><circle cx="27.5" cy="24.5" r="1.6" fill="#065F46" />
+    <ellipse cx="22" cy="29" rx="1.5" ry="1" fill="#F9A8D4" />
+    <circle cx="22" cy="32" r="1.8" stroke="#065F46" strokeWidth="1" fill="none" />
+    <ellipse cx="15" cy="28" rx="3" ry="2" fill="#A7F3D0" opacity=".4" />
+    <ellipse cx="29" cy="28" rx="3" ry="2" fill="#A7F3D0" opacity=".4" />
+  </svg>
+)
+const P2 = ({ className = "w-8 h-8" }) => (
+  <svg viewBox="0 0 44 44" className={className} fill="none">
+    <path d="M10 21L7 6L18 17Z" fill="#FDBA74" /><path d="M34 21L37 6L26 17Z" fill="#FDBA74" />
+    <circle cx="22" cy="26" r="14" fill="#FFF7ED" />
+    <ellipse cx="17" cy="24" rx="2.5" ry="3" fill="white" /><circle cx="17" cy="25" r="1.8" fill="#9A3412" />
+    <ellipse cx="27" cy="24" rx="2.5" ry="3" fill="white" /><circle cx="27" cy="25" r="1.8" fill="#9A3412" />
+    <ellipse cx="22" cy="29" rx="1.5" ry="1" fill="#F9A8D4" />
+    <path d="M19 32Q22 30 25 32" stroke="#9A3412" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+    <ellipse cx="15" cy="28" rx="3" ry="2" fill="#FED7AA" opacity=".5" />
+    <ellipse cx="29" cy="28" rx="3" ry="2" fill="#FED7AA" opacity=".5" />
+  </svg>
+)
+const P3 = ({ className = "w-8 h-8" }) => (
+  <svg viewBox="0 0 44 44" className={className} fill="none">
+    <path d="M10 21L7 6L18 17Z" fill="#FDA4AF" /><path d="M34 21L37 6L26 17Z" fill="#FDA4AF" />
+    <circle cx="22" cy="26" r="14" fill="#FFF1F2" />
+    <path d="M14 23L20 25" stroke="#9F1239" strokeWidth="1.6" strokeLinecap="round" />
+    <path d="M30 23L24 25" stroke="#9F1239" strokeWidth="1.6" strokeLinecap="round" />
+    <circle cx="17" cy="25.5" r="1.2" fill="#9F1239" /><circle cx="27" cy="25.5" r="1.2" fill="#9F1239" />
+    <ellipse cx="22" cy="29" rx="1.3" ry=".9" fill="#F9A8D4" />
+    <ellipse cx="22" cy="33" rx="2.5" ry="2" fill="#9F1239" opacity=".15" />
+    <path d="M34 14Q36 11 38 14" stroke="#FDA4AF" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    <path d="M36 10Q38 7 40 10" stroke="#FDA4AF" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity=".6" />
+    <ellipse cx="15" cy="28" rx="3" ry="2" fill="#FECDD3" opacity=".5" />
+    <ellipse cx="29" cy="28" rx="3" ry="2" fill="#FECDD3" opacity=".5" />
+  </svg>
+)
+const P4 = ({ className = "w-8 h-8" }) => (
+  <svg viewBox="0 0 44 44" className={className} fill="none">
+    <path d="M10 21L7 6L18 17Z" fill="#F87171" /><path d="M34 21L37 6L26 17Z" fill="#F87171" />
+    <circle cx="22" cy="26" r="14" fill="#FEE2E2" />
+    <path d="M14 24L20 26" stroke="#991B1B" strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M30 24L24 26" stroke="#991B1B" strokeWidth="1.8" strokeLinecap="round" />
+    <circle cx="17" cy="26.5" r="1.3" fill="#991B1B" /><circle cx="27" cy="26.5" r="1.3" fill="#991B1B" />
+    <ellipse cx="22" cy="29" rx="1.2" ry=".8" fill="#F9A8D4" />
+    <path d="M18 32Q22 37 26 32" stroke="#991B1B" strokeWidth="1.3" fill="#FCA5A5" opacity=".5" />
+    <path d="M13 27Q12 31 13.5 34" stroke="#60A5FA" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    <path d="M31 27Q32 31 30.5 34" stroke="#60A5FA" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    <ellipse cx="15" cy="28" rx="3" ry="2" fill="#FECACA" opacity=".5" />
+    <ellipse cx="29" cy="28" rx="3" ry="2" fill="#FECACA" opacity=".5" />
+  </svg>
+)
+const MN = ({ className = "w-8 h-8" }) => (
+  <svg viewBox="0 0 44 44" className={className} fill="none">
+    <path d="M10 21L7 6L18 17Z" fill="#FCD34D" /><path d="M34 21L37 6L26 17Z" fill="#FCD34D" />
+    <circle cx="22" cy="26" r="14" fill="#FFFBEB" />
+    <circle cx="17" cy="24" r="2" fill="#78350F" /><circle cx="16.3" cy="23.3" r=".8" fill="white" />
+    <circle cx="27" cy="24" r="2" fill="#78350F" /><circle cx="26.3" cy="23.3" r=".8" fill="white" />
+    <ellipse cx="22" cy="28.5" rx="1.5" ry="1" fill="#F9A8D4" />
+    <path d="M18 30Q22 33 26 30" stroke="#78350F" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+    <circle cx="33" cy="12" r="2.5" fill="#FCD34D" /><circle cx="33" cy="12" r="1.2" fill="#FBBF24" />
+    <ellipse cx="15" cy="28" rx="3" ry="2" fill="#FEF3C7" opacity=".5" />
+    <ellipse cx="29" cy="28" rx="3" ry="2" fill="#FEF3C7" opacity=".5" />
+  </svg>
+)
+const MS = ({ className = "w-8 h-8" }) => (
+  <svg viewBox="0 0 44 44" className={className} fill="none">
+    <path d="M10 21L7 6L18 17Z" fill="#F0ABFC" /><path d="M34 21L37 6L26 17Z" fill="#F0ABFC" />
+    <circle cx="22" cy="26" r="14" fill="#FAF5FF" />
+    <circle cx="17" cy="24" r="3.2" fill="white" /><circle cx="17.5" cy="25" r="2.2" fill="#581C87" /><circle cx="16.5" cy="23.5" r="1" fill="white" />
+    <circle cx="27" cy="24" r="3.2" fill="white" /><circle cx="27.5" cy="25" r="2.2" fill="#581C87" /><circle cx="26.5" cy="23.5" r="1" fill="white" />
+    <ellipse cx="22" cy="29" rx="1.2" ry=".8" fill="#F9A8D4" />
+    <path d="M20 31Q22 30 24 31" stroke="#581C87" strokeWidth="1" strokeLinecap="round" fill="none" />
+    <ellipse cx="34" cy="10" rx="3.5" ry="2" fill="#E9D5FF" opacity=".7" />
+    <ellipse cx="36" cy="7" rx="2.5" ry="1.5" fill="#E9D5FF" opacity=".4" />
+    <ellipse cx="15" cy="28" rx="3.5" ry="2" fill="#F3E8FF" opacity=".5" />
+    <ellipse cx="29" cy="28" rx="3.5" ry="2" fill="#F3E8FF" opacity=".5" />
+  </svg>
+)
+const MI = ({ className = "w-8 h-8" }) => (
+  <svg viewBox="0 0 44 44" className={className} fill="none">
+    <path d="M10 21L7 6L18 17Z" fill="#FCA5A5" /><path d="M34 21L37 6L26 17Z" fill="#FCA5A5" />
+    <circle cx="22" cy="26" r="14" fill="#FEF2F2" />
+    <circle cx="17" cy="24" r="2" fill="#7F1D1D" /><circle cx="27" cy="24" r="2" fill="#7F1D1D" />
+    <ellipse cx="22" cy="28.5" rx="1.3" ry=".9" fill="#F9A8D4" />
+    <circle cx="14" cy="28" r="3.5" fill="#FECACA" opacity=".5" />
+    <circle cx="30" cy="28" r="3.5" fill="#FECACA" opacity=".5" />
+    <path d="M19 30Q22 32 25 30" stroke="#7F1D1D" strokeWidth="1" strokeLinecap="round" fill="none" />
+    <path d="M36 9L38 5L37 9L40 8L37 11" stroke="#FCA5A5" strokeWidth="1.3" strokeLinecap="round" fill="none" />
+  </svg>
+)
+const MD = ({ className = "w-8 h-8" }) => (
+  <svg viewBox="0 0 44 44" className={className} fill="none">
+    <path d="M10 21L7 6L18 17Z" fill="#93C5FD" /><path d="M34 21L37 6L26 17Z" fill="#93C5FD" />
+    <circle cx="22" cy="26" r="14" fill="#EFF6FF" />
+    <path d="M14 24Q17 22 20 24" stroke="#1E3A8A" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    <path d="M24 24Q27 22 30 24" stroke="#1E3A8A" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    <circle cx="17" cy="24.5" r="1" fill="#1E3A8A" /><circle cx="27" cy="24.5" r="1" fill="#1E3A8A" />
+    <ellipse cx="22" cy="29" rx="1.3" ry=".9" fill="#F9A8D4" />
+    <path d="M19 32Q22 30 25 32" stroke="#1E3A8A" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+    <path d="M13 27Q12 31 13 34" stroke="#60A5FA" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    <path d="M31 27Q32 31 31 34" stroke="#60A5FA" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    <ellipse cx="15" cy="28" rx="3" ry="2" fill="#BFDBFE" opacity=".4" />
+    <ellipse cx="29" cy="28" rx="3" ry="2" fill="#BFDBFE" opacity=".4" />
+  </svg>
+)
+const MA = ({ className = "w-8 h-8" }) => (
+  <svg viewBox="0 0 44 44" className={className} fill="none">
+    <path d="M10 21L7 6L18 17Z" fill="#A5B4FC" /><path d="M34 21L37 6L26 17Z" fill="#A5B4FC" />
+    <circle cx="22" cy="26" r="14" fill="#EEF2FF" />
+    <circle cx="17" cy="23" r="3" fill="white" /><circle cx="17.5" cy="23.5" r="2" fill="#312E81" /><circle cx="16.5" cy="22.5" r=".8" fill="white" />
+    <circle cx="27" cy="23" r="3" fill="white" /><circle cx="27.5" cy="23.5" r="2" fill="#312E81" /><circle cx="26.5" cy="22.5" r=".8" fill="white" />
+    <ellipse cx="22" cy="28.5" rx="1.2" ry=".8" fill="#F9A8D4" />
+    <circle cx="22" cy="32" r="2" stroke="#312E81" strokeWidth="1" fill="none" />
+    <path d="M35 13Q37 11 36 9" stroke="#A5B4FC" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    <path d="M37 15Q39 13 38 11" stroke="#A5B4FC" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity=".6" />
+    <ellipse cx="15" cy="27" rx="3" ry="2" fill="#C7D2FE" opacity=".4" />
+    <ellipse cx="29" cy="27" rx="3" ry="2" fill="#C7D2FE" opacity=".4" />
+  </svg>
+)
+
 /* helpers */
 
 function toISO(d) {
@@ -61,11 +197,11 @@ function parseContent(record) {
 /* constants */
 
 const PAIN_LABELS = [
-  { value: 0, emoji: '\ud83d\ude0a', text: '\u65e0\u75db' },
-  { value: 1, emoji: '\ud83d\ude42', text: '\u8f7b\u5fae' },
-  { value: 2, emoji: '\ud83d\ude10', text: '\u4e2d\u7b49' },
-  { value: 3, emoji: '\ud83d\ude23', text: '\u8f83\u91cd' },
-  { value: 4, emoji: '\ud83d\ude2d', text: '\u4e25\u91cd' },
+  { value: 0, Cat: Pe, text: '无痛' },
+  { value: 1, Cat: P1, text: '轻微' },
+  { value: 2, Cat: P2, text: '中等' },
+  { value: 3, Cat: P3, text: '较重' },
+  { value: 4, Cat: P4, text: '严重' },
 ]
 
 const FLOW_OPTIONS = [
@@ -75,11 +211,11 @@ const FLOW_OPTIONS = [
 ]
 
 const MOOD_OPTIONS = [
-  { value: 'normal', emoji: '\ud83d\ude0c', text: '\u6b63\u5e38' },
-  { value: 'sensitive', emoji: '\ud83e\udd7a', text: '\u654f\u611f' },
-  { value: 'irritable', emoji: '\ud83d\ude24', text: '\u70e6\u8e81' },
-  { value: 'sad', emoji: '\ud83d\ude22', text: '\u4f4e\u843d' },
-  { value: 'anxious', emoji: '\ud83d\ude30', text: '\u7126\u8651' },
+  { value: 'normal', Cat: MN, text: '正常' },
+  { value: 'sensitive', Cat: MS, text: '敏感' },
+  { value: 'irritable', Cat: MI, text: '烦躁' },
+  { value: 'sad', Cat: MD, text: '低落' },
+  { value: 'anxious', Cat: MA, text: '焦虑' },
 ]
 
 const WEEKDAYS = ['\u65e5', '\u4e00', '\u4e8c', '\u4e09', '\u56db', '\u4e94', '\u516d']
@@ -491,7 +627,7 @@ export default function PeriodTrackerPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          {painInfo && (p.symptoms?.pain ?? 0) > 0 && <span className="text-sm" title={painInfo.text}>{painInfo.emoji}</span>}
+                          {painInfo && (p.symptoms?.pain ?? 0) > 0 && <painInfo.Cat className="w-6 h-6" />}
                           {flowInfo && (
                             <span className="text-[11px] px-1.5 py-0.5 rounded-md bg-coral-50 dark:bg-coral-900/20 text-coral-500 dark:text-coral-400 font-medium">{flowInfo.label}</span>
                           )}
@@ -504,16 +640,16 @@ export default function PeriodTrackerPage() {
                       <div className="px-4 pb-4 space-y-3 animate-fade-in border-t border-milk-100 dark:border-dark-border pt-3">
                         <div className="grid grid-cols-3 gap-2">
                           <div className="rounded-xl bg-milk-50 dark:bg-white/5 p-2.5 text-center">
-                            <p className="text-lg">{painInfo?.emoji || '\ud83d\ude0a'}</p>
-                            <p className="text-[11px] text-milk-500 dark:text-milk-400 mt-0.5">{painInfo?.text || '\u65e0\u75db'}</p>
+                            {painInfo ? <painInfo.Cat className="w-8 h-8 mx-auto" /> : <Pe className="w-8 h-8 mx-auto" />}
+                            <p className="text-[11px] text-milk-500 dark:text-milk-400 mt-0.5">{painInfo?.text || '无痛'}</p>
                           </div>
                           <div className="rounded-xl bg-milk-50 dark:bg-white/5 p-2.5 text-center">
-                            <p className="text-sm font-medium text-coral-500 dark:text-coral-400">{'\ud83d\udca7'.repeat(flowInfo?.drops || 1)}</p>
-                            <p className="text-[11px] text-milk-500 dark:text-milk-400 mt-0.5">{flowInfo?.label || '\u4e2d'}</p>
+                            <p className="text-sm font-medium text-coral-500 dark:text-coral-400">{'💧'.repeat(flowInfo?.drops || 1)}</p>
+                            <p className="text-[11px] text-milk-500 dark:text-milk-400 mt-0.5">{flowInfo?.label || '中'}</p>
                           </div>
                           <div className="rounded-xl bg-milk-50 dark:bg-white/5 p-2.5 text-center">
-                            <p className="text-lg">{moodInfo?.emoji || '\ud83d\ude0c'}</p>
-                            <p className="text-[11px] text-milk-500 dark:text-milk-400 mt-0.5">{moodInfo?.text || '\u6b63\u5e38'}</p>
+                            {moodInfo ? <moodInfo.Cat className="w-8 h-8 mx-auto" /> : <MN className="w-8 h-8 mx-auto" />}
+                            <p className="text-[11px] text-milk-500 dark:text-milk-400 mt-0.5">{moodInfo?.text || '正常'}</p>
                           </div>
                         </div>
                         {p.symptoms?.notes && (
@@ -580,7 +716,7 @@ export default function PeriodTrackerPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-milk-700 dark:text-milk-300 mb-2">{'\u75bc\u75db\u7a0b\u5ea6'}</label>
+                <label className="block text-sm font-medium text-milk-700 dark:text-milk-300 mb-2">{'疼痛程度'}</label>
                 <div className="flex gap-2">
                   {PAIN_LABELS.map(opt => (
                     <button key={opt.value} onClick={() => setFormData(p => ({ ...p, pain: opt.value }))}
@@ -590,7 +726,7 @@ export default function PeriodTrackerPage() {
                           ? 'bg-coral-50 dark:bg-coral-900/30 ring-2 ring-coral-400 shadow-sm'
                           : 'bg-milk-50 dark:bg-white/5 hover:bg-milk-100 dark:hover:bg-white/10'
                       )}>
-                      <span className="text-xl">{opt.emoji}</span>
+                      <opt.Cat className="w-11 h-11" />
                       <span className="text-[11px] text-milk-600 dark:text-milk-400">{opt.text}</span>
                     </button>
                   ))}
@@ -616,7 +752,7 @@ export default function PeriodTrackerPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-milk-700 dark:text-milk-300 mb-2">{'\u5fc3\u60c5'}</label>
+                <label className="block text-sm font-medium text-milk-700 dark:text-milk-300 mb-2">{'心情'}</label>
                 <div className="flex gap-2">
                   {MOOD_OPTIONS.map(opt => (
                     <button key={opt.value} onClick={() => setFormData(p => ({ ...p, mood: opt.value }))}
@@ -626,7 +762,7 @@ export default function PeriodTrackerPage() {
                           ? 'bg-coral-50 dark:bg-coral-900/30 ring-2 ring-coral-400 shadow-sm'
                           : 'bg-milk-50 dark:bg-white/5 hover:bg-milk-100 dark:hover:bg-white/10'
                       )}>
-                      <span className="text-xl">{opt.emoji}</span>
+                      <opt.Cat className="w-11 h-11" />
                       <span className="text-[11px] text-milk-600 dark:text-milk-400">{opt.text}</span>
                     </button>
                   ))}
