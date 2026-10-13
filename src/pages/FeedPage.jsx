@@ -482,7 +482,7 @@ export default function FeedPage() {
                             </div>
                           )}
                           <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-milk-100 dark:border-dark-border/50">
-                            <span className="text-[10px] text-milk-500 dark:text-milk-500 font-medium">{record.author}</span>
+                            <span className="text-[10px] text-milk-500 dark:text-milk-400 font-medium">{record.author}</span>
                             <div className="flex items-center gap-2">
                               {record.commentCount > 0 && <span className="text-[10px] text-apricot-400 font-medium">{record.commentCount}评论</span>}
                               <span className="text-[10px] text-milk-400 dark:text-milk-500">{formatRelativeTime(record.created_at)}</span>
@@ -501,7 +501,7 @@ export default function FeedPage() {
       )}
 
       {/* Empty state — beautiful illustration */}
-      {!loading && !error && records.length === 0 && (
+      {!loading && !error && records.length === 0 && todayRecCards.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
           <div className="animate-float">
             <GardenEmptyIllustration />

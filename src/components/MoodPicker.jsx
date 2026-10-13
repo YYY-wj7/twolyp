@@ -28,6 +28,7 @@ export default function MoodPicker() {
   const [partnerMood, setPartnerMood] = useState(null) // partner's mood today
   const [partnerName, setPartnerName] = useState('')
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [loaded, setLoaded] = useState(false)
 
   // Fetch today's moods for both partners
@@ -77,6 +78,7 @@ export default function MoodPicker() {
   const handleSelectMood = async (mood) => {
     if (saving || todayMood || !gardenId || !user) return
     setSaving(true)
+    setSaveError('')
     try {
       const today = getTodayKey()
       const content = `${mood.emoji}${mood.label}`
@@ -92,11 +94,13 @@ export default function MoodPicker() {
         }),
         8000
       )
-      if (!error) {
+      if (error) {
+        setSaveError('保存失败，请重试')
+      } else {
         setTodayMood(content)
       }
     } catch (e) {
-      console.warn('Failed to save mood:', e)
+      setSaveError('网络异常，请重试')
     } finally {
       setSaving(false)
     }
@@ -104,9 +108,10 @@ export default function MoodPicker() {
 
   if (!loaded) return null
 
-  // Parse mood emoji from content string
-  const myEmoji = todayMood ? todayMood.slice(0, 2) : null
-  const partnerEmoji = partnerMood ? partnerMood.slice(0, 2) : null
+  // Extract emoji safely using Array.from for proper unicode handling
+  const extractEmoji = (str) => str ? Array.from(str).slice(0, 1).join('') : null
+  const myEmoji = extractEmoji(todayMood)
+  const partnerEmoji = extractEmoji(partnerMood)
 
   return (
     <div className="mx-4 mb-3 animate-fade-in">
@@ -117,13 +122,20 @@ export default function MoodPicker() {
       )}>
         {/* Date + status */}
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-milk-500 dark:text-milk-500 font-medium">{formatToday()}</span>
+          <span className="text-xs text-milk-500 dark:text-milk-400 font-medium">{formatToday()}</span>
           {myEmoji && (
             <span className="text-[10px] text-apricot-500 dark:text-apricot-400 font-medium">
               已记录 ✓
             </span>
           )}
         </div>
+
+        {/* Error feedback */}
+        {saveError && (
+          <div className="mb-2 text-[11px] text-tulip-500 bg-tulip-50 dark:bg-tulip-900/20 px-2.5 py-1.5 rounded-lg">
+            {saveError}
+          </div>
+        )}
 
         {/* Mood selection or result display */}
         {myEmoji ? (
@@ -138,21 +150,21 @@ export default function MoodPicker() {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-milk-500 dark:text-milk-500 mr-1 shrink-0">今天心情</span>
-            <div className="flex gap-1.5 flex-1">
+            <span className="text-xs text-milk-500 dark:text-milk-400 mr-1 shrink-0">今天心情</span>
+            <div className="flex gap-1 flex-1">
               {MOODS.map(mood => (
                 <button
                   key={mood.label}
                   onClick={() => handleSelectMood(mood)}
                   disabled={saving}
                   className={cn(
-                    'flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl transition-all duration-200',
+                    'flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl transition-all duration-200',
                     'hover:bg-apricot-50 dark:hover:bg-dark-surface active:scale-95',
                     saving && 'opacity-50'
                   )}
                 >
                   <span className="text-lg">{mood.emoji}</span>
-                  <span className="text-[9px] text-milk-500 dark:text-milk-500">{mood.label}</span>
+                  <span className="text-[9px] text-milk-500 dark:text-milk-400">{mood.label}</span>
                 </button>
               ))}
             </div>
@@ -161,7 +173,7 @@ export default function MoodPicker() {
 
         {/* Partner mood badge */}
         {partnerEmoji && !myEmoji && (
-          <div className="mt-1.5 text-[11px] text-milk-500 dark:text-milk-500">
+          <div className="mt-1.5 text-[11px] text-milk-500 dark:text-milk-400">
             {partnerName}今天选了 {partnerEmoji}
           </div>
         )}

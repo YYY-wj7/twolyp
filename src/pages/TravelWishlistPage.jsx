@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, X, MapPin, Check, Plane, Loader2 } from 'lucide-react'
+import { ArrowLeft, Plus, X, MapPin, Check, Plane, Loader2, Trash2 } from 'lucide-react'
 import { useAuth } from '../contexts/AppContext'
 import { supabase } from '../lib/supabase'
 import { cn, withTimeout } from '../lib/utils'
@@ -24,6 +24,7 @@ export default function TravelWishlistPage() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [formData, setFormData] = useState({ ...DEFAULT_FORM })
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
 
   // Fetch wishlist items
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function TravelWishlistPage() {
           .eq('is_deleted', false)
           .eq('category', 'custom')
           .contains('custom_tags', ['wishlist'])
-          .order('created_at', { ascending: false }),
+          .order('recorded_at', { ascending: false }),
         15000,
         '加载心愿单'
       )
@@ -70,8 +71,9 @@ export default function TravelWishlistPage() {
   async function handleSave() {
     if (!formData.title.trim() || !gardenId || !user) return
     setSaving(true)
+    setError('')
     try {
-      const { data, error } = await supabase
+      const { data, error: insertError } = await supabase
         .from('records')
         .insert({
           garden_id: gardenId,
@@ -89,15 +91,35 @@ export default function TravelWishlistPage() {
         })
         .select()
         .single()
-      if (error) throw error
+      if (insertError) throw insertError
       setItems(prev => [data, ...prev])
       setFormData({ ...DEFAULT_FORM })
       setShowAddModal(false)
     } catch (e) {
-      console.error('Failed to add wishlist item:', e)
+      setError('添加失败，请重试')
     } finally {
       setSaving(false)
     }
+  }
+
+  // Delete a destination
+  async function handleDelete(item) {
+    if (!confirm(`确定删除「${item.title}」吗？`)) return
+    setItems(prev => prev.filter(i => i.id !== item.id))
+    try {
+      await supabase.from('records').update({ is_deleted: true, deleted_at: new Date().toISOString() }).eq('id', item.id)
+    } catch (e) {
+      setItems(prev => [...prev, item]) // rollback on error
+      setError('删除失败')
+    }
+  }
+
+  // Close modal and reset form
+  function handleCloseModal() {
+    if (saving) return
+    setFormData({ ...DEFAULT_FORM })
+    setError('')
+    setShowAddModal(false)
   }
 
   const visitedCount = items.filter(i => i.is_pinned).length
@@ -165,16 +187,23 @@ export default function TravelWishlistPage() {
               const meta = parseContent(item)
               const visited = item.is_pinned
               return (
-                <button
+                <div
                   key={item.id}
                   onClick={() => toggleStatus(item)}
                   className={cn(
-                    'shadow-card rounded-2xl bg-white dark:bg-dark-card p-4 text-left transition-all active:scale-[0.97]',
+                    'relative shadow-card rounded-2xl bg-white dark:bg-dark-card p-4 text-left transition-all active:scale-[0.97] cursor-pointer',
                     visited && 'ring-2 ring-green-300/50'
                   )}
                 >
+                  {/* Delete button */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDelete(item) }}
+                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/10 opacity-40 hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-all"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
                   <div className="text-3xl mb-2">{meta.emoji || '📍'}</div>
-                  <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm truncate">{item.title}</h3>
+                  <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm pr-6 truncate">{item.title}</h3>
                   {meta.subtitle && (
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">{meta.subtitle}</p>
                   )}
@@ -190,13 +219,13 @@ export default function TravelWishlistPage() {
                       'inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-medium',
                       visited
                         ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                        : 'bg-pink-50 dark:bg-pink-900/30 text-coral-500 dark:text-coral-400'
+                        : 'bg-pink-50 dark:bg-pink-900/30 text-apricot-500 dark:text-apricot-400'
                     )}>
                       {visited && <Check className="w-3 h-3" />}
                       {visited ? '已去' : '想去'}
                     </span>
                   </div>
-                </button>
+                </div>
               )
             })}
           </div>
@@ -214,7 +243,7 @@ export default function TravelWishlistPage() {
       {/* Bottom sheet modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => !saving && setShowAddModal(false)} />
+          <div className="absolute inset-0 bg-black/40" onClick={handleCloseModal} />
           <div className="relative w-full max-w-lg bg-white dark:bg-dark-card rounded-t-3xl p-6 pb-8 animate-slide-up">
             {/* Close handle */}
             <div className="flex justify-center mb-4">
@@ -223,7 +252,7 @@ export default function TravelWishlistPage() {
 
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">添加目的地</h2>
-              <button onClick={() => !saving && setShowAddModal(false)} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
+              <button onClick={handleCloseModal} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
                 <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
@@ -294,6 +323,13 @@ export default function TravelWishlistPage() {
                   ))}
                 </div>
               </div>
+
+              {/* Error feedback */}
+              {error && (
+                <div className="text-[11px] text-tulip-500 bg-tulip-50 dark:bg-tulip-900/20 px-2.5 py-1.5 rounded-lg">
+                  {error}
+                </div>
+              )}
 
               {/* Save button */}
               <button
