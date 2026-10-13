@@ -548,6 +548,12 @@ html.dark .auth-message-success {
 .shadow-card-hover {
   box-shadow: 0 4px 16px rgba(74, 50, 56, 0.1), 0 8px 24px rgba(74, 50, 56, 0.06);
 }
+html.dark .shadow-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+html.dark .shadow-card-hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.2);
+}
 
 /* Premium gradient utilities */
 .gradient-coral {
@@ -573,6 +579,9 @@ html.dark .auth-message-success {
   background: rgba(255, 250, 250, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+}
+html.dark .glass {
+  background: rgba(28, 20, 24, 0.85);
 }
 .glass-dark {
   background: rgba(28, 20, 24, 0.85);

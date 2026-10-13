@@ -259,6 +259,12 @@ export default function FeedPage() {
     }
   }, [gardenId])
 
+  // Initial fetch on mount
+  useEffect(() => {
+    if (gardenId) fetchRecords()
+  }, [gardenId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-fetch when navigating back to /feed from another page
   useEffect(() => {
     const prevPathname = prevPathnameRef.current
     const currentPathname = location.pathname
@@ -269,8 +275,6 @@ export default function FeedPage() {
 
     prevPathnameRef.current = currentPathname
   }, [location.pathname, fetchRecords])
-
-  // fetchRecords is called via the pathname-aware effect above
 
   const filteredRecords = records.filter(r => {
     if (activeCategory !== 'all' && r.category !== activeCategory) return false
@@ -406,7 +410,7 @@ export default function FeedPage() {
               <div className="rounded-2xl overflow-hidden bg-white dark:bg-dark-card shadow-card border border-milk-100/80 dark:border-dark-border cursor-pointer active:scale-[0.98] hover:shadow-card-hover transition-all duration-200">
                 {/* Cover image */}
                 {record.coverImage && (
-                  <div className="relative overflow-hidden">
+                  <div className="relative overflow-hidden min-h-[120px] bg-milk-100 dark:bg-dark-surface">
                     <img
                       src={record.coverImage}
                       alt={record.title}

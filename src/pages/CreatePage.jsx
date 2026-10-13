@@ -23,15 +23,14 @@ export default function CreatePage() {
   const [uploadProgress, setUploadProgress] = useState('')
   const [error, setError] = useState('')
   const fileInputRef = useRef(null)
+  const previewUrlsRef = useRef([])
 
   // Clean up object URLs on unmount to prevent memory leaks
   useEffect(() => {
     return () => {
-      media.forEach(m => {
-        if (m.preview) URL.revokeObjectURL(m.preview)
-      })
+      previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url))
     }
-  }, [media])
+  }, [])
 
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -46,19 +45,26 @@ export default function CreatePage() {
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files || [])
-    const newMedia = files.map(file => ({
-      id: crypto.randomUUID?.() || Date.now().toString(36) + Math.random().toString(36).slice(2),
-      file,
-      preview: URL.createObjectURL(file),
-      type: 'image',
-    }))
+    const newMedia = files.map(file => {
+      const previewUrl = URL.createObjectURL(file)
+      previewUrlsRef.current.push(previewUrl)
+      return {
+        id: crypto.randomUUID?.() || Date.now().toString(36) + Math.random().toString(36).slice(2),
+        file,
+        preview: previewUrl,
+        type: 'image',
+      }
+    })
     setMedia(prev => [...prev, ...newMedia])
     e.target.value = ''
   }
 
   const handleRemoveMedia = (id) => {
     const item = media.find(m => m.id === id)
-    if (item?.preview) URL.revokeObjectURL(item.preview)
+    if (item?.preview) {
+      URL.revokeObjectURL(item.preview)
+      previewUrlsRef.current = previewUrlsRef.current.filter(u => u !== item.preview)
+    }
     setMedia(media.filter(m => m.id !== id))
   }
 
